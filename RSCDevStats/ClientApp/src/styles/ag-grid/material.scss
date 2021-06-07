@@ -1,0 +1,22 @@
+@import "~ag-grid-community/src/styles/ag-grid.scss";
+@import "~ag-grid-community/src/styles/ag-theme-material/sass/ag-theme-material-mixin";
+
+.ag-theme-material {
+	@include ag-theme-material(
+		(
+			"input-focus-box-shadow": none,
+		)
+	);
+	font-family: "Noto Sans", sans-serif;
+	color: #323232;
+	.ag-header {
+		font-family: "Noto Sans", sans-serif;
+		font-size: 12px;
+	}
+	font-size: 14px;
+}
+
+// For some reason this needs to be set b/c the ag-react-container for ButtonRenderers is always wrong -_-
+.ag-react-container {
+	height: 100%;
+}
