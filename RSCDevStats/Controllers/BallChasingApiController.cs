@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using static RSCWebApi.EntityFrameworkDatabaseContext;
@@ -40,7 +41,7 @@ namespace RSCWebApi.Controllers
         [Route("GetGroupsByCreator/{creator}")]
         public List<BallChasingGroup> GetGroupsByCreator(string creator)
         {
-            Console.WriteLine(DateTime.Now.ToString());
+            //Console.WriteLine(DateTime.Now.ToString());
             var ballChasingClient = new BallChasingClient();
 
             var request = new RestRequest("groups", DataFormat.Json);
@@ -48,16 +49,21 @@ namespace RSCWebApi.Controllers
             request.AddHeader("Authorization", _configuration["BallchasingApiKey"]);
             request.AddParameter("creator", creator);
 
-            var response = ballChasingClient.restClient.Get<BallChasingGroupRoot>(request).Data;
+            var response = ballChasingClient.restClient.Get<BallChasingGroupRoot>(request);
 
-            return response.list;
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                Console.WriteLine("another 429, GetGroupsByCreator, creator: " + creator);
+            }
+
+            return response.Data.list;
         }
 
         [HttpGet]
         [Route("GetGroupsByParentGroup/{groupId}")]
         public List<BallChasingGroup> GetGroupsByParentGroup(string groupId)
         {
-            Console.WriteLine(DateTime.Now.ToString());
+            //Console.WriteLine(DateTime.Now.ToString());
             var ballChasingClient = new BallChasingClient();
 
             var request = new RestRequest("groups", DataFormat.Json);
@@ -67,16 +73,21 @@ namespace RSCWebApi.Controllers
             //request.AddHeader("Authorization", "bF2DbFsOycipB4EmRTFoIp1SgXnMYqV8qS9275DY");
             request.AddParameter("group", groupId);
 
-            var response = ballChasingClient.restClient.Get<BallChasingGroupRoot>(request).Data;
+            var response = ballChasingClient.restClient.Get<BallChasingGroupRoot>(request);
 
-            return response.list;
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                Console.WriteLine("another 429, GetGroupsByParentGroup, groupId: " + groupId);
+            }
+
+            return response.Data.list;
         }
 
         [HttpGet]
         [Route("GetGroupById/{groupId}")]
         public BallChasingGroupStats GetGroupById(string groupId)
         {
-            Console.WriteLine(DateTime.Now.ToString());
+            //Console.WriteLine(DateTime.Now.ToString());
             var ballChasingClient = new BallChasingClient();
 
             var request = new RestRequest("groups/" + groupId, DataFormat.Json);
@@ -86,6 +97,11 @@ namespace RSCWebApi.Controllers
 
             var response = ballChasingClient.restClient.Get<BallChasingGroupStats>(request);
 
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                Console.WriteLine("another 429, GetGroupById, groupId: " + groupId);
+            }
+
             return response.Data;
         }
 
@@ -93,7 +109,7 @@ namespace RSCWebApi.Controllers
         [Route("GetReplaysByGroup/{groupId}")]
         public BallChasingReplayListRoot GetReplaysByGroup(string groupId)
         {
-            Console.WriteLine(DateTime.Now.ToString());
+            //Console.WriteLine(DateTime.Now.ToString());
             var ballChasingClient = new BallChasingClient();
 
             var request = new RestRequest("replays", DataFormat.Json);
@@ -102,6 +118,11 @@ namespace RSCWebApi.Controllers
             request.AddParameter("group", groupId);
 
             var response = ballChasingClient.restClient.Get<BallChasingReplayListRoot>(request);
+
+            if(response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                Console.WriteLine("another 429, GetReplaysByGroup, groupId: " + groupId);
+            }
 
             return response.Data;
         }
@@ -118,6 +139,11 @@ namespace RSCWebApi.Controllers
 
             var response = ballChasingClient.restClient.Get<BallChasingReplay>(request);
             //Console.WriteLine(DateTime.Now.ToString() + "Response code: " + response.StatusCode);
+
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                Console.WriteLine("another 429, GetReplayById, replayId: " + replayId);
+            }
 
             return response.Data;
         }

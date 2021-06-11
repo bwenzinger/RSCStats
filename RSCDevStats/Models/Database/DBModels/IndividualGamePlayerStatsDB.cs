@@ -17,6 +17,7 @@ namespace RSCWebApi
 		public string OnlineId { get; set; }
 		public string Tier { get; set; }
 		public string Team { get; set; }
+		public string OponentTeam { get; set; }
 		public int GamesWon { get; set; }
 		public int GamesLost { get; set; }
 		public int Score { get; set; }

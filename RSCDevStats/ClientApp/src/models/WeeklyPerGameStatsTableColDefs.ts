@@ -30,6 +30,10 @@ const WeeklyPerGameStatsTableColDefs: ColDef[] = [
 	{ headerName: "Tier", field: nameof<IndividualGamePlayerStats>("Tier") },
 	{ headerName: "Team", field: nameof<IndividualGamePlayerStats>("Team") },
 	{
+		headerName: "Oponent Team",
+		field: nameof<IndividualGamePlayerStats>("OponentTeam"),
+	},
+	{
 		headerName: "Wins",
 		field: nameof<IndividualGamePlayerStats>("GamesWon"),
 	},
@@ -64,7 +68,7 @@ const WeeklyPerGameStatsTableColDefs: ColDef[] = [
 		headerName: "ShotsAgainst",
 		field: nameof<IndividualGamePlayerStats>("ShotsAgainst"),
 	},
-	{ headerName: "bpm", field: nameof<IndividualGamePlayerStats>("bpm") },
+	{ headerName: "bpm", field: nameof<IndividualGamePlayerStats>("Bpm") },
 ]
 
 export default WeeklyPerGameStatsTableColDefs

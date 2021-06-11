@@ -1,17 +1,17 @@
 export interface CumulativePlayerStats {
 	Name: string
 	RSCId: string
-	OnlineId: string
 	Tier: string
 	Team: string
+	GamesPlayed?: number | undefined
 	GamesWon?: number | undefined
 	GamesLost?: number | undefined
+	MVPs?: number | undefined
 	Score?: number | undefined
 	Goals?: number | undefined
 	Assists?: number | undefined
 	Saves?: number | undefined
 	Shots?: number | undefined
-	MVPs?: number | undefined
 	Cycle?: number | undefined
 	HatTrick?: number | undefined
 	Playmaker?: number | undefined
@@ -21,7 +21,7 @@ export interface CumulativePlayerStats {
 	AssistAgainst?: number | undefined
 	SavesAgainst?: number | undefined
 	ShotsAgainst?: number | undefined
-	bpm?: number | undefined
+	Bpm?: number | undefined
 	AvgBoostAmount?: number | undefined
 	BoostCollected?: number | undefined
 	BoostCollectedBigPads?: number | undefined
@@ -88,6 +88,7 @@ export interface IndividualGamePlayerStats {
 	Week: number
 	Tier: string
 	Team: string
+	OponentTeam: string
 	GamesWon?: number | undefined
 	GamesLost?: number | undefined
 	Score?: number | undefined
@@ -105,7 +106,7 @@ export interface IndividualGamePlayerStats {
 	AssistAgainst?: number | undefined
 	SavesAgainst?: number | undefined
 	ShotsAgainst?: number | undefined
-	bpm?: number | undefined
+	Bpm?: number | undefined
 	AvgBoostAmount?: number | undefined
 	BoostCollected?: number | undefined
 	BoostCollectedBigPads?: number | undefined

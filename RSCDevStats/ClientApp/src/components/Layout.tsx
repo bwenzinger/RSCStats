@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import styled from "styled-components"
-import { NavMenu } from "./NavMenu"
+import NavMenu from "./NavMenu"
 
 type Props = {
 	className?: string
@@ -20,7 +20,11 @@ class Layout extends Component<Props> {
 }
 
 export default styled(Layout)`
-	height: calc(
-		100% - 82px
-	); //82px is the height of the navmenu + margin for page
+	height: 100%;
+	background-color: #171d30;
+	color: #d0d2d6;
+	/* background-color: #343a40; */
+	/* height: calc(
+		100% - 56px
+	); //56px is the height of the navmenu + margin for page */
 `

@@ -32,7 +32,7 @@ interface PassedProps {
 	isDragActive?: boolean
 }
 
-const trackerLinksSheetId = "1HLd_2yMGh_lX3adMLxQglWPIfRuiSiv587ABYnQX-0s"
+// const trackerLinksSheetId = "1HLd_2yMGh_lX3adMLxQglWPIfRuiSiv587ABYnQX-0s"
 
 const rawStatsGoogleSheet = "1y4abHsJrmkdQAGGNW7ZAVpnrL3lZVN5Eh4bnsxWfHlo"
 
@@ -82,6 +82,13 @@ const StatsCongregate = (props: PassedProps) => {
 		IndividualGamePlayerStats[]
 	>([])
 
+	const [outStandingRequests, setOutStandingRequests] =
+		React.useState<number>(0)
+	const [processedRequests, setProcessedRequests] = React.useState<number>(0)
+
+	const processedRequestsRef = React.useRef<number>(0)
+	const outStandingRequestsRef = React.useRef<number>(0)
+
 	useEffect(() => {
 		ballChasingApi.instance
 			.get<BallChasingGroup[]>(`GetGroupsByCreator/76561199096013422`) //this is the RSC steam
@@ -112,101 +119,101 @@ const StatsCongregate = (props: PassedProps) => {
 			})
 	}, [])
 
-	useEffect(() => {
-		const client = gapi.client as any
+	// useEffect(() => {
+	// 	const client = gapi.client as any
 
-		client.sheets.spreadsheets.values
-			.get({
-				spreadsheetId: trackerLinksSheetId,
-				range: "Link List",
-			})
-			.then(
-				function (response: any) {
-					const tempPlayerTrackerIds: PlayerTrackerId[] = []
-					response.result.values.forEach((element: any) => {
-						let trackerLink = element[2] as string
+	// 	client.sheets.spreadsheets.values
+	// 		.get({
+	// 			spreadsheetId: trackerLinksSheetId,
+	// 			range: "Link List",
+	// 		})
+	// 		.then(
+	// 			function (response: any) {
+	// 				const tempPlayerTrackerIds: PlayerTrackerId[] = []
+	// 				response.result.values.forEach((element: any) => {
+	// 					let trackerLink = element[2] as string
 
-						let trackerPlatform = ""
-						let trackerId = ""
+	// 					let trackerPlatform = ""
+	// 					let trackerId = ""
 
-						if (trackerLink.startsWith("http://")) {
-							trackerLink = trackerLink.replace("http://", "https://") //just make them all https since it doesn't really matter
-						}
+	// 					if (trackerLink.startsWith("http://")) {
+	// 						trackerLink = trackerLink.replace("http://", "https://") //just make them all https since it doesn't really matter
+	// 					}
 
-						//some of the links include "rocket-league"
-						if (trackerLink.includes("/rocket-league/")) {
-							trackerLink = trackerLink.replace("/rocket-league", "")
-						}
+	// 					//some of the links include "rocket-league"
+	// 					if (trackerLink.includes("/rocket-league/")) {
+	// 						trackerLink = trackerLink.replace("/rocket-league", "")
+	// 					}
 
-						if (trackerLink.includes("/xbl/")) {
-							trackerLink = trackerLink.replace("/xbl", "/xbox") //not sure if there's a difference here?
-						}
+	// 					if (trackerLink.includes("/xbl/")) {
+	// 						trackerLink = trackerLink.replace("/xbl", "/xbox") //not sure if there's a difference here?
+	// 					}
 
-						if (trackerLink.includes("/ps/")) {
-							trackerLink = trackerLink.replace("/ps/", "/psn/") //not sure if there's a difference here?
-						}
+	// 					if (trackerLink.includes("/ps/")) {
+	// 						trackerLink = trackerLink.replace("/ps/", "/psn/") //not sure if there's a difference here?
+	// 					}
 
-						if (trackerLink.includes("steam")) {
-							//steam
-							trackerPlatform = "Steam"
-							trackerId = trackerLink.split(
-								"https://rocketleague.tracker.network/profile/steam/"
-							)[1]
-						} else if (trackerLink.includes("epic")) {
-							//epic
-							trackerPlatform = "Epic"
-							//uri is in ASCII so we need to decode it
-							trackerId = decodeURIComponent(trackerLink).split(
-								"https://rocketleague.tracker.network/profile/epic/"
-							)[1]
-						} else if (trackerLink.includes("xbox")) {
-							//xbox
-							trackerPlatform = "Xbox"
-							trackerId = decodeURIComponent(trackerLink).split(
-								"https://rocketleague.tracker.network/profile/xbox/"
-							)[1]
-						} else if (trackerLink.includes("switch")) {
-							//xbox
-							trackerPlatform = "Switch"
-							trackerId = trackerLink.split(
-								"https://rocketleague.tracker.network/profile/switch/"
-							)[1]
-						} else {
-							trackerPlatform = "PS4"
-							//playstation
-							trackerId = trackerLink.split(
-								"https://rocketleague.tracker.network/profile/psn/"
-							)[1]
-						}
+	// 					if (trackerLink.includes("steam")) {
+	// 						//steam
+	// 						trackerPlatform = "Steam"
+	// 						trackerId = trackerLink.split(
+	// 							"https://rocketleague.tracker.network/profile/steam/"
+	// 						)[1]
+	// 					} else if (trackerLink.includes("epic")) {
+	// 						//epic
+	// 						trackerPlatform = "Epic"
+	// 						//uri is in ASCII so we need to decode it
+	// 						trackerId = decodeURIComponent(trackerLink).split(
+	// 							"https://rocketleague.tracker.network/profile/epic/"
+	// 						)[1]
+	// 					} else if (trackerLink.includes("xbox")) {
+	// 						//xbox
+	// 						trackerPlatform = "Xbox"
+	// 						trackerId = decodeURIComponent(trackerLink).split(
+	// 							"https://rocketleague.tracker.network/profile/xbox/"
+	// 						)[1]
+	// 					} else if (trackerLink.includes("switch")) {
+	// 						//xbox
+	// 						trackerPlatform = "Switch"
+	// 						trackerId = trackerLink.split(
+	// 							"https://rocketleague.tracker.network/profile/switch/"
+	// 						)[1]
+	// 					} else {
+	// 						trackerPlatform = "PS4"
+	// 						//playstation
+	// 						trackerId = trackerLink.split(
+	// 							"https://rocketleague.tracker.network/profile/psn/"
+	// 						)[1]
+	// 					}
 
-						// if (!trackerId) {
-						//   console.log(trackerLink)
-						//   console.log(trackerId)
-						// }
+	// 					// if (!trackerId) {
+	// 					//   console.log(trackerLink)
+	// 					//   console.log(trackerId)
+	// 					// }
 
-						//if the tracker id still contains /overview at the end, remove it
-						if (trackerId && trackerId.includes("/")) {
-							trackerId = trackerId.split("/")[0]
-						}
+	// 					//if the tracker id still contains /overview at the end, remove it
+	// 					if (trackerId && trackerId.includes("/")) {
+	// 						trackerId = trackerId.split("/")[0]
+	// 					}
 
-						tempPlayerTrackerIds.push({
-							RSCId: element[0],
-							Name: element[1],
-							TrackerLink: element[2],
-							platform: trackerPlatform,
-							platformId: trackerId,
-						})
-					})
-					// console.log("player tracker ids:")
-					// console.log(tempPlayerTrackerIds)
+	// 					tempPlayerTrackerIds.push({
+	// 						RSCId: element[0],
+	// 						Name: element[1],
+	// 						TrackerLink: element[2],
+	// 						platform: trackerPlatform,
+	// 						platformId: trackerId,
+	// 					})
+	// 				})
+	// 				// console.log("player tracker ids:")
+	// 				// console.log(tempPlayerTrackerIds)
 
-					setPlayerTrackerIds(tempPlayerTrackerIds)
-				},
-				function (error: any) {
-					console.log("Error: " + error.result.error.message)
-				}
-			)
-	}, [])
+	// 				setPlayerTrackerIds(tempPlayerTrackerIds)
+	// 			},
+	// 			function (error: any) {
+	// 				console.log("Error: " + error.result.error.message)
+	// 			}
+	// 		)
+	// }, [])
 
 	React.useEffect(() => {
 		if (showCumulativeStats) {
@@ -232,7 +239,7 @@ const StatsCongregate = (props: PassedProps) => {
 					<div>
 						{ballChasingSeasonGroups.map((element) => (
 							<Button
-								className="ballchasing-group-button"
+								className="ballchasing-group-button action-button-color material-drop-shadow"
 								onClick={() => onSeasonGroupClick(element)}
 								key={"ballchasing-group-" + element.name}
 							>
@@ -251,7 +258,7 @@ const StatsCongregate = (props: PassedProps) => {
 						<div>
 							{ballChasingLeagueGroups.map((element) => (
 								<Button
-									className="ballchasing-group-button"
+									className="ballchasing-group-button action-button-color material-drop-shadow"
 									onClick={() => onLeagueGroupClick(element)}
 									key={"ballchasing-group-" + element.name}
 								>
@@ -268,7 +275,7 @@ const StatsCongregate = (props: PassedProps) => {
 					<div>
 						{ballChasingDayGroups.map((element) => (
 							<Button
-								className="ballchasing-group-button"
+								className="ballchasing-group-button action-button-color material-drop-shadow"
 								onClick={() => onDayGroupClick(element)}
 								key={"ballchasing-group-" + element.name}
 							>
@@ -279,16 +286,21 @@ const StatsCongregate = (props: PassedProps) => {
 				)}
 				{ballChasingTeamGroups &&
 					ballChasingTeamGroups.length > 0 && [
-						<Button className="headerButton" onClick={exportToExcel}>
+						<Button
+							className="headerButton action-button-color material-drop-shadow"
+							onClick={exportToExcel}
+						>
 							Export to excel
 						</Button>,
 						<Button
-							className="toggleStatsViewButton"
+							className="toggleStatsViewButton action-button-color material-drop-shadow"
 							onClick={() => setShowCumulativeStats(!showCumulativeStats)}
 						>
 							Toggle per game/cumulative stats
 						</Button>,
 					]}
+				<div>outstanding: {outStandingRequests}</div>
+				<div>processed: {processedRequests}</div>
 			</div>
 
 			{ballChasingTeamGroups &&
@@ -447,6 +459,7 @@ const StatsCongregate = (props: PassedProps) => {
 
 				let tempPlayerStats: CumulativePlayerStats[] = []
 				let tempPlayerStatsByGame: IndividualGamePlayerStats[] = []
+
 				// let timeout = 0
 				// let numberResponsesProcessed = 0
 				response.data.forEach((item) => {
@@ -461,9 +474,14 @@ const StatsCongregate = (props: PassedProps) => {
 									const detailedReplays: BallChasingReplay[] = []
 
 									getReplaysForDayGroupResponse.data.list?.forEach((replay) => {
+										outStandingRequestsRef.current++
+										setOutStandingRequests(outStandingRequestsRef.current)
 										ballChasingApiRateLimited.instance
 											.get<BallChasingReplay>(`GetReplayById/${replay.id}`)
 											.then(function (getSingleReplayResponse) {
+												processedRequestsRef.current++
+												setProcessedRequests(processedRequestsRef.current)
+
 												detailedReplays.push(getSingleReplayResponse.data)
 												if (
 													detailedReplays.length ===
@@ -505,23 +523,6 @@ const StatsCongregate = (props: PassedProps) => {
 
 															let playerIndividualReplayStats: BallChasingReplayPlayersEntity[] =
 																[]
-
-															// getReplaysForDayGroupResponse.data.list?.forEach(
-															// 	(replay) => {
-															// 		const tempPlayerStatsFromReplays = replay[
-															// 			playerTeamIsBlue ? "blue" : "orange"
-															// 		].players?.filter(
-															// 			(x) =>
-															// 				x.id.id.toUpperCase() ===
-															// 				groupPlayerBeingProcessed.id.toUpperCase()
-															// 		)
-															// 		if (tempPlayerStatsFromReplays) {
-															// 			playerStatsFromReplays.push(
-															// 				...tempPlayerStatsFromReplays
-															// 			)
-															// 		}
-															// 	}
-															// )
 
 															detailedReplays.forEach((replay) => {
 																let tempPlayerStats = replay[
@@ -590,6 +591,11 @@ const StatsCongregate = (props: PassedProps) => {
 																				) ?? -1,
 																			Tier: selectedLeagueGroup?.name ?? "",
 																			Team: groupPlayerBeingProcessed.team, //TODO THIS SHOULD COME FROM RSC SOMEWHERE
+																			OponentTeam:
+																				getReplaysForDayGroupResponse.data
+																					.list!![0][
+																					playerTeamIsBlue ? "orange" : "blue"
+																				].name, //TODO THIS SHOULD COME FROM RSC SOMEWHERE
 																			GamesWon: playerWonGame ? 1 : 0,
 																			GamesLost: playerWonGame ? 0 : 1,
 																			Score: tempPlayerStats.stats.core.score,
@@ -625,7 +631,7 @@ const StatsCongregate = (props: PassedProps) => {
 																			ShotsAgainst:
 																				tempPlayerStats.stats.core
 																					.shots_against,
-																			bpm: tempPlayerStats.stats.boost.bpm,
+																			Bpm: tempPlayerStats.stats.boost.bpm,
 																			AvgBoostAmount:
 																				tempPlayerStats.stats.boost.avg_amount,
 																			BoostCollected:
@@ -794,119 +800,119 @@ const StatsCongregate = (props: PassedProps) => {
 															})
 
 															if (foundPlayer) {
-																tempPlayerStats.push({
-																	Name: groupPlayerBeingProcessed.name,
-																	RSCId: foundPlayer?.RSCId,
-																	OnlineId: groupPlayerBeingProcessed.id,
-																	Tier: selectedLeagueGroup?.name ?? "",
-																	Team: groupPlayerBeingProcessed.team, //TODO THIS SHOULD COME FROM RSC SOMEWHERE
-																	GamesWon:
-																		groupPlayerBeingProcessed.cumulative.wins,
-																	GamesLost:
-																		groupPlayerBeingProcessed.cumulative.games -
-																		groupPlayerBeingProcessed.cumulative.wins,
-																	Score:
-																		groupPlayerBeingProcessed.cumulative.core
-																			.score,
-																	Goals:
-																		groupPlayerBeingProcessed.cumulative.core
-																			.goals,
-																	Assists:
-																		groupPlayerBeingProcessed.cumulative.core
-																			.assists,
-																	Saves:
-																		groupPlayerBeingProcessed.cumulative.core
-																			.saves,
-																	Shots:
-																		groupPlayerBeingProcessed.cumulative.core
-																			.shots,
-																	MVPs: playerStatsFromReplays.filter(
-																		(x) => x.mvp === true
-																	).length,
-																	Cycle: playerIndividualReplayStats.filter(
-																		(x) =>
-																			x.stats.core.goals > 0 &&
-																			x.stats.core.assists > 0 &&
-																			x.stats.core.saves > 0 &&
-																			x.stats.core.shots > 0
-																	).length,
-																	HatTrick: playerIndividualReplayStats.filter(
-																		(x) => x.stats.core.goals > 2
-																	).length,
-																	Playmaker: playerIndividualReplayStats.filter(
-																		(x) => x.stats.core.assists > 2
-																	).length,
-																	Savior: playerIndividualReplayStats.filter(
-																		(x) => x.stats.core.saves > 2
-																	).length,
-																	// PointsAgainst: playerIndividualReplayStats.fore
-																	GoalsAgainst:
-																		groupPlayerBeingProcessed.cumulative.core
-																			.goals_against,
-																	// AssistAgainst: groupPlayerBeingProcessed.cumulative.core
-																	// .goals_against
-																	// SavesAgainst: number
-																	ShotsAgainst:
-																		groupPlayerBeingProcessed.cumulative.core
-																			.shots_against,
-																	bpm: groupPlayerBeingProcessed.cumulative
-																		.boost.bpm,
-																	// AvgBoostAmount: number
-																	// BoostCollected: number
-																	// BoostCollectedBigPads: number
-																	// BoostCollectedSmallPads: number
-																	// CountCollectedBigPads: number
-																	// CountCollectedSmallPads: number
-																	// BoostStolen: number
-																	// BoostStolenBigPads: number
-																	// BoostStolenSmallPads: number
-																	// CountStolenBigPads: number
-																	// CountStolenSmallpads: number
-																	// ZeroBoostTime: number
-																	// HundredBoostTime: number
-																	// BoostUsedWhileSupersonic: number
-																	// BoostOverfillTotal: number
-																	// BoostOverfillStolen: number
-																	// AverageSpeed: number
-																	// TotalDistance: number
-																	// TimeSlowSpeed: number
-																	// PercentSlowSpeed: number
-																	// TimeBoostSpeed: number
-																	// PercentBoostSpeed: number
-																	// TimeSupersonic: number
-																	// PercentSupersonic: number
-																	// TimeOnGround: number
-																	// PercentOnGround: number
-																	// TimeLowAir: number
-																	// PercentLowAir: number
-																	// TimeHighAir: number
-																	// PercentHighAir: number
-																	// TimePowerslide: number
-																	// AveragePowerslideTime: number
-																	// CountPowerslide: number
-																	// TimeMostBack: number
-																	// PercentMostBack: number
-																	// TimeMostForward: number
-																	// PercentMostForward: number
-																	// TimeInFrontOfBall: number
-																	// PercentInFrontOfBall: number
-																	// TimeDefensiveHalf: number
-																	// PercentDefensiveHalf: number
-																	// TimeOffensiveHalf: number
-																	// PercentOffensiveHalf: number
-																	// TimeDefensiveThird: number
-																	// PercentageDefensiveThird: number
-																	// TimeNeutralThird: number
-																	// PercentNeutralThird: number
-																	// TimeOffensiveThird: number
-																	// PercentOffensiveThird: number
-																	// AverageDistanceToBall: number
-																	// AverageDistanceToBallHasPossession: number
-																	// AverageDistanceToBallNoPossession: number
-																	// DemosInflicted: number
-																	// DemosTaken: number
-																	// LossMVP: number
-																})
+																// tempPlayerStats.push({
+																// 	Name: groupPlayerBeingProcessed.name,
+																// 	RSCId: foundPlayer?.RSCId,
+																// 	Tier: selectedLeagueGroup?.name ?? "",
+																// 	Team: groupPlayerBeingProcessed.team, //TODO THIS SHOULD COME FROM RSC SOMEWHERE
+																// 	GamesPlayed:
+																// 	GamesWon:
+																// 		groupPlayerBeingProcessed.cumulative.wins,
+																// 	GamesLost:
+																// 		groupPlayerBeingProcessed.cumulative.games -
+																// 		groupPlayerBeingProcessed.cumulative.wins,
+																// 	Score:
+																// 		groupPlayerBeingProcessed.cumulative.core
+																// 			.score,
+																// 	Goals:
+																// 		groupPlayerBeingProcessed.cumulative.core
+																// 			.goals,
+																// 	Assists:
+																// 		groupPlayerBeingProcessed.cumulative.core
+																// 			.assists,
+																// 	Saves:
+																// 		groupPlayerBeingProcessed.cumulative.core
+																// 			.saves,
+																// 	Shots:
+																// 		groupPlayerBeingProcessed.cumulative.core
+																// 			.shots,
+																// 	MVPs: playerStatsFromReplays.filter(
+																// 		(x) => x.mvp === true
+																// 	).length,
+																// 	Cycle: playerIndividualReplayStats.filter(
+																// 		(x) =>
+																// 			x.stats.core.goals > 0 &&
+																// 			x.stats.core.assists > 0 &&
+																// 			x.stats.core.saves > 0 &&
+																// 			x.stats.core.shots > 0
+																// 	).length,
+																// 	HatTrick: playerIndividualReplayStats.filter(
+																// 		(x) => x.stats.core.goals > 2
+																// 	).length,
+																// 	Playmaker: playerIndividualReplayStats.filter(
+																// 		(x) => x.stats.core.assists > 2
+																// 	).length,
+																// 	Savior: playerIndividualReplayStats.filter(
+																// 		(x) => x.stats.core.saves > 2
+																// 	).length,
+																// 	// PointsAgainst: playerIndividualReplayStats.fore
+																// 	GoalsAgainst:
+																// 		groupPlayerBeingProcessed.cumulative.core
+																// 			.goals_against,
+																// 	// AssistAgainst: groupPlayerBeingProcessed.cumulative.core
+																// 	// .goals_against
+																// 	// SavesAgainst: number
+																// 	ShotsAgainst:
+																// 		groupPlayerBeingProcessed.cumulative.core
+																// 			.shots_against,
+																// 	bpm: groupPlayerBeingProcessed.cumulative
+																// 		.boost.bpm,
+																// 	// AvgBoostAmount: number
+																// 	// BoostCollected: number
+																// 	// BoostCollectedBigPads: number
+																// 	// BoostCollectedSmallPads: number
+																// 	// CountCollectedBigPads: number
+																// 	// CountCollectedSmallPads: number
+																// 	// BoostStolen: number
+																// 	// BoostStolenBigPads: number
+																// 	// BoostStolenSmallPads: number
+																// 	// CountStolenBigPads: number
+																// 	// CountStolenSmallpads: number
+																// 	// ZeroBoostTime: number
+																// 	// HundredBoostTime: number
+																// 	// BoostUsedWhileSupersonic: number
+																// 	// BoostOverfillTotal: number
+																// 	// BoostOverfillStolen: number
+																// 	// AverageSpeed: number
+																// 	// TotalDistance: number
+																// 	// TimeSlowSpeed: number
+																// 	// PercentSlowSpeed: number
+																// 	// TimeBoostSpeed: number
+																// 	// PercentBoostSpeed: number
+																// 	// TimeSupersonic: number
+																// 	// PercentSupersonic: number
+																// 	// TimeOnGround: number
+																// 	// PercentOnGround: number
+																// 	// TimeLowAir: number
+																// 	// PercentLowAir: number
+																// 	// TimeHighAir: number
+																// 	// PercentHighAir: number
+																// 	// TimePowerslide: number
+																// 	// AveragePowerslideTime: number
+																// 	// CountPowerslide: number
+																// 	// TimeMostBack: number
+																// 	// PercentMostBack: number
+																// 	// TimeMostForward: number
+																// 	// PercentMostForward: number
+																// 	// TimeInFrontOfBall: number
+																// 	// PercentInFrontOfBall: number
+																// 	// TimeDefensiveHalf: number
+																// 	// PercentDefensiveHalf: number
+																// 	// TimeOffensiveHalf: number
+																// 	// PercentOffensiveHalf: number
+																// 	// TimeDefensiveThird: number
+																// 	// PercentageDefensiveThird: number
+																// 	// TimeNeutralThird: number
+																// 	// PercentNeutralThird: number
+																// 	// TimeOffensiveThird: number
+																// 	// PercentOffensiveThird: number
+																// 	// AverageDistanceToBall: number
+																// 	// AverageDistanceToBallHasPossession: number
+																// 	// AverageDistanceToBallNoPossession: number
+																// 	// DemosInflicted: number
+																// 	// DemosTaken: number
+																// 	// LossMVP: number
+																// })
 															} else {
 																console.log("handle missing player:")
 																console.log(groupPlayerBeingProcessed)
@@ -1025,7 +1031,7 @@ export default styled(StatsCongregate)`
 	margin: 25px;
 	display: flex;
 	flex-direction: column;
-	height: 100%;
+	height: calc(100% - 50px);
 
 	.headerBox {
 		flex: 0;

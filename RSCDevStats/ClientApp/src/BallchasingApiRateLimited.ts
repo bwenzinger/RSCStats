@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios"
 
 const MAX_REQUESTS_COUNT = 1
-const INTERVAL_MS = 1000
+const INTERVAL_MS = 100
 let PENDING_REQUESTS = 0
 
 export default class BallChasingApiRateLimited {

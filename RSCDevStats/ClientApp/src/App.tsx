@@ -2,6 +2,7 @@ import React, { Component } from "react"
 // import { Route } from "react-router"
 // import { Layout } from "./components/Layout"
 // import { Home } from "./components/Home"
+import { RecoilRoot } from "recoil"
 
 import "./custom.css"
 // import ReplayUpload from "./components/ReplayUpload"
@@ -14,7 +15,9 @@ export default class App extends Component {
 
 	render() {
 		return (
-			<SignInWrapper />
+			<RecoilRoot>
+				<SignInWrapper />
+			</RecoilRoot>
 			// <Layout>
 			// 	<Route exact path="/" component={Home} />
 			// 	<Route path="/upload" component={ReplayUpload} />

@@ -64,7 +64,7 @@ namespace RSCWebApi
         public int overtime_seconds { get; set; }
         public int season { get; set; }
         public string season_type { get; set; }
-        public DateTime date { get; set; }
+        //public DateTime date { get; set; }
         public bool date_has_tz { get; set; }
         public string visibility { get; set; }
         //public DateTime created { get; set; }

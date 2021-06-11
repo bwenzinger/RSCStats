@@ -34,6 +34,9 @@ namespace RSCDevStats
             //        .EnableDetailedErrors()       // <-- with debugging (remove for production).
             //);
 
+            services.AddMvc()
+                .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
+
             //services.Add(new ServiceDescriptor(typeof(DatabaseContext), new DatabaseContext(Configuration.GetConnectionString("DefaultConnection"))));
             //services.AddDbContext<EntityFrameworkDatabaseContext>(options =>
             //    options.UseMySql(connectionString: Configuration.GetConnectionString("DefaultConnection")));

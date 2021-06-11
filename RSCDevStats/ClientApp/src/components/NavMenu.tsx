@@ -10,67 +10,117 @@ import {
 } from "reactstrap"
 import { Link } from "react-router-dom"
 import "./NavMenu.css"
+import styled from "styled-components"
 
 type State = {
 	collapsed: boolean
 }
+type Props = {
+	className?: string
+}
 
-export class NavMenu extends Component<{}, State> {
+class NavMenu extends Component<Props, State> {
 	static displayName = NavMenu.name
 
-	constructor(props: any) {
-		super(props)
+	// constructor(props: any) {
+	// 	super(props)
 
-		this.toggleNavbar = this.toggleNavbar.bind(this)
-		this.state = {
-			collapsed: true,
-		}
-	}
+	// 	// this.toggleNavbar = this.toggleNavbar.bind(this)
+	// 	// this.state = {
+	// 	// 	collapsed: true,
+	// 	// }
+	// }
 
-	toggleNavbar() {
-		this.setState({
-			collapsed: !this.state.collapsed,
-		})
-	}
+	// toggleNavbar() {
+	// 	this.setState({
+	// 		collapsed: !this.state.collapsed,
+	// 	})
+	// }
 
 	render() {
 		return (
-			<header>
-				<Navbar
-					className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3"
-					light
-				>
-					<Container>
-						<NavbarBrand tag={Link} to="/">
-							RSCDevStats
-						</NavbarBrand>
-						<NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
-						<Collapse
+			/* <Navbar
+					color="dark"
+					className="navbar-expand-sm navbar-toggleable-sm ng-dark box-shadow"
+					dark={true}
+					style={{ backgroundColor: "#f1f1f1" }}
+				> */
+			<div
+				className={
+					this.props.className + " navmenu-navbar material-drop-shadow"
+				}
+			>
+				{/* <Container> */}
+				{/* <NavbarBrand className="navmenu-brand" tag={Link} to="/">
+						RSCStats
+					</NavbarBrand> */}
+				<NavLink tag={Link} className="navmenu-brand" to="/">
+					RSC Stats
+				</NavLink>
+				{/* <div className="navmenu-brand2">RSCStats</div> */}
+				{/* <NavbarToggler onClick={this.toggleNavbar} className="mr-2" /> */}
+				{/* <Collapse
 							className="d-sm-inline-flex flex-sm-row-reverse"
 							isOpen={!this.state.collapsed}
 							navbar
-						>
-							<ul className="navbar-nav flex-grow">
-								<NavItem>
-									<NavLink tag={Link} className="text-dark" to="/">
-										Home
-									</NavLink>
-								</NavItem>
-								<NavItem>
-									<NavLink tag={Link} className="text-dark" to="/upload">
-										Replay Upload
-									</NavLink>
-								</NavItem>
-								<NavItem>
-									<NavLink tag={Link} className="text-dark" to="/statsstuff">
-										Stats stuff
-									</NavLink>
-								</NavItem>
-							</ul>
-						</Collapse>
-					</Container>
-				</Navbar>
-			</header>
+						> */}
+				{/* <ul className="navbar-nav flex-grow"> */}
+				{/* <NavItem> */}
+				<NavLink tag={Link} className="navmenu-navlink" to="/">
+					Home
+				</NavLink>
+				{/* </NavItem>
+						<NavItem> */}
+				<NavLink tag={Link} className="navmenu-navlink" to="/upload">
+					Replay Upload
+				</NavLink>
+				{/* </NavItem>
+						<NavItem> */}
+				<NavLink tag={Link} className="navmenu-navlink" to="/statsstuff">
+					Stats stuff
+				</NavLink>
+				{/* </NavItem>
+						<NavItem> */}
+				<NavLink tag={Link} className="navmenu-navlink" to="/viewstats">
+					View Stats
+				</NavLink>
+				{/* </NavItem> */}
+				{/* </ul> */}
+				{/* </Container> */}
+			</div>
+			/* </Collapse> */
+			/* </Navbar> */
 		)
 	}
 }
+
+export default styled(NavMenu)`
+	/* background-color: #171d30; */
+	background-color: #2a3045;
+	color: #fff;
+	display: flex;
+	flex-direction: row;
+	padding-left: 25%;
+	height: 56px;
+	margin-left: 100px;
+	margin-right: 100px;
+	border-radius: 0px 0px 10px 10px;
+
+	.navmenu-brand {
+		margin-top: auto;
+		margin-bottom: auto;
+		color: #d0d2d6;
+	}
+
+	.navmenu-navlink {
+		margin-top: auto;
+		margin-bottom: auto;
+		color: #d0d2d6;
+		:hover {
+			color: #54596a;
+		}
+	}
+	.navmenu-brand {
+		margin-right: 25%;
+	}
+`

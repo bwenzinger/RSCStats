@@ -15,12 +15,16 @@ const WeeklyCumulativeStatsTableColDefs: ColDef[] = [
 		pinned: true,
 	},
 	{ headerName: "RSCId", field: nameof<CumulativePlayerStats>("RSCId") },
-	{ headerName: "OnlineId", field: nameof<CumulativePlayerStats>("OnlineId") },
+	// { headerName: "OnlineId", field: nameof<CumulativePlayerStats>("OnlineId") },
 	{ headerName: "Tier", field: nameof<CumulativePlayerStats>("Tier") },
 	{ headerName: "Team", field: nameof<CumulativePlayerStats>("Team") },
-	{ headerName: "GamesWon", field: nameof<CumulativePlayerStats>("GamesWon") },
 	{
-		headerName: "GamesLost",
+		headerName: "Games Played",
+		field: nameof<CumulativePlayerStats>("GamesPlayed"),
+	},
+	{ headerName: "Games Won", field: nameof<CumulativePlayerStats>("GamesWon") },
+	{
+		headerName: "Games Lost",
 		field: nameof<CumulativePlayerStats>("GamesLost"),
 	},
 	{ headerName: "Score", field: nameof<CumulativePlayerStats>("Score") },
@@ -44,7 +48,7 @@ const WeeklyCumulativeStatsTableColDefs: ColDef[] = [
 		headerName: "ShotsAgainst",
 		field: nameof<CumulativePlayerStats>("ShotsAgainst"),
 	},
-	{ headerName: "bpm", field: nameof<CumulativePlayerStats>("bpm") },
+	{ headerName: "bpm", field: nameof<CumulativePlayerStats>("Bpm") },
 ]
 
 export default WeeklyCumulativeStatsTableColDefs

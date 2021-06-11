@@ -8,12 +8,37 @@
 		)
 	);
 	font-family: "Noto Sans", sans-serif;
-	color: #323232;
-	.ag-header {
+	color: #d0d2d6;
+	::-webkit-scrollbar {
+		background: #171d30;
+		width: 15px;
+		height: 15px;
+	}
+	::-webkit-scrollbar-button {
+		display: none;
+	}
+	::-webkit-scrollbar-thumb {
+		background: #54596a;
+		border-radius: 10px;
+	}
+	​ .ag-header {
 		font-family: "Noto Sans", sans-serif;
 		font-size: 12px;
 	}
+
 	font-size: 14px;
+	--ag-background-color: #171d30;
+	--ag-header-background-color: #171d30;
+	--ag-header-foreground-color: #d0d2d6;
+	--ag-foreground-color: #d0d2d6;
+	--ag-odd-row-background-color: #2a3045;
+	--ag-row-hover-color: #54596a;
+	--ag-border-color: #54596a;
+	--ag-header-cell-hover-background-color: #54596a;
+	--ag-secondary-foreground-color: #d0d2d6;
+	--ag-checkbox-unchecked-color: #7267e9;
+	--ag-checkbox-checked-color: #020202;
+	--ag-selected-row-background-color: #69448e;
 }
 
 // For some reason this needs to be set b/c the ag-react-container for ButtonRenderers is always wrong -_-
