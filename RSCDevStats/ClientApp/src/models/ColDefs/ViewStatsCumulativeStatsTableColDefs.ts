@@ -1,6 +1,6 @@
 import { ColDef } from "ag-grid-community"
-import { nameof } from "../utils/utils"
-import { CumulativePlayerStats } from "./CumulativePlayerStats"
+import { nameof } from "../../utils/utils"
+import { CumulativePlayerStats } from "../CumulativePlayerStats"
 
 const ViewStatsCumulativeStatsTableColDefs: ColDef[] = [
 	{

@@ -32,3 +32,16 @@ code {
 	background-color: #8278eb !important;
 	box-shadow: none;
 }
+
+::-webkit-scrollbar {
+	background: #171d30;
+	width: 15px;
+	height: 15px;
+}
+::-webkit-scrollbar-button {
+	display: none;
+}
+::-webkit-scrollbar-thumb {
+	background: #54596a;
+	border-radius: 10px;
+}

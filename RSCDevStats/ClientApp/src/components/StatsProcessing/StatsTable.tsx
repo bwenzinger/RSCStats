@@ -3,8 +3,8 @@ import React, { useState } from "react"
 import styled from "styled-components"
 import { AgGridReact } from "ag-grid-react"
 import { GridOptions } from "ag-grid-community"
-import WeeklyCumulativeStatsTableColDefs from "../models/WeeklyCumulativeStatsTableColDefs"
-import { CumulativePlayerStats } from "../models/CumulativePlayerStats"
+import { CumulativePlayerStats } from "../../models/CumulativePlayerStats"
+import WeeklyCumulativeStatsTableColDefs from "../../models/ColDefs/WeeklyCumulativeStatsTableColDefs"
 // import App from "./App"
 
 interface PassedProps {

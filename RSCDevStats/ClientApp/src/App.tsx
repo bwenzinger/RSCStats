@@ -1,14 +1,65 @@
 import React, { Component } from "react"
-// import { Route } from "react-router"
-// import { Layout } from "./components/Layout"
-// import { Home } from "./components/Home"
 import { RecoilRoot } from "recoil"
 
 import "./custom.css"
-// import ReplayUpload from "./components/ReplayUpload"
-// import StatsCongregate from "./components/StatsCongregate"
 import SignInWrapper from "./components/SignInWrapper"
 import "./styles/ag-grid/material.scss"
+import { createMuiTheme, ThemeProvider } from "@material-ui/core"
+import type from "@material-ui/lab/themeAugmentation" //dont delete
+
+const theme = createMuiTheme({
+	overrides: {
+		MuiCssBaseline: {
+			"@global": {
+				html: {
+					WebkitFontSmoothing: "auto",
+				},
+			},
+		},
+		MuiInputBase: {
+			root: {
+				color: "#d0d2d6",
+			},
+		},
+		MuiFormLabel: {
+			root: {
+				color: "#d0d2d6",
+			},
+		},
+		MuiIconButton: {
+			root: {
+				color: "#d0d2d6",
+			},
+		},
+		MuiInput: {
+			underline: {
+				color: "#d0d2d6",
+			},
+		},
+		MuiPaper: {
+			root: {
+				backgroundColor: "#2a3045",
+				color: "#d0d2d6",
+			},
+		},
+		MuiSwitch: {
+			colorSecondary: {
+				color: "#7267e9",
+				"&$checked": {
+					color: "#7267e9",
+				},
+				"&$checked + $track": {
+					backgroundColor: "#7267e9",
+				},
+			},
+		},
+		// MuiAutocomplete: {
+		// 	popper: {
+		// 		color: "green",
+		// 	},
+		// },
+	},
+})
 
 export default class App extends Component {
 	static displayName = App.name
@@ -16,7 +67,9 @@ export default class App extends Component {
 	render() {
 		return (
 			<RecoilRoot>
-				<SignInWrapper />
+				<ThemeProvider theme={theme}>
+					<SignInWrapper />
+				</ThemeProvider>
 			</RecoilRoot>
 			// <Layout>
 			// 	<Route exact path="/" component={Home} />

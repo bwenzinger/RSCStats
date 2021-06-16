@@ -6,9 +6,8 @@ import Layout from "./Layout"
 import { Route } from "react-router"
 import { Home } from "./Home"
 import ReplayUpload from "./ReplayUpload"
-import StatsCongregate from "./StatsCongregate"
 import ViewStats from "./ViewStats"
-import StatsProcessing from "./StatsProcessing"
+import StatsProcessing from "./StatsProcessing/StatsProcessing"
 import { PlayerTrackerId } from "../models/PlayerTrackerId"
 import { atom, useRecoilState } from "recoil"
 // import App from "./App"
@@ -19,6 +18,11 @@ interface PassedProps {
 
 const playerTrackerIdsState = atom<PlayerTrackerId[] | undefined>({
 	key: "playerTrackerIds", // unique ID (with respect to other atoms/selectors)
+	default: undefined, // default value (aka initial value)
+})
+
+const uniquePlayerNamesState = atom<string[] | undefined>({
+	key: "uniquePlayerNames", // unique ID (with respect to other atoms/selectors)
 	default: undefined, // default value (aka initial value)
 })
 
@@ -75,6 +79,10 @@ const SignInWrapper = (props: PassedProps) => {
 
 	const [playerTrackerIds, setPlayerTrackerIds] = useRecoilState(
 		playerTrackerIdsState
+	)
+
+	const [uniquePlayerNames, setUniquePlayerNames] = useRecoilState(
+		uniquePlayerNamesState
 	)
 
 	useEffect(() => {
@@ -197,6 +205,12 @@ const SignInWrapper = (props: PassedProps) => {
 							// console.log(tempPlayerTrackerIds)
 
 							setPlayerTrackerIds(tempPlayerTrackerIds)
+
+							setUniquePlayerNames([
+								...new Set<string>([
+									...tempPlayerTrackerIds.map((x) => x.Name),
+								]),
+							])
 						},
 						function (error: any) {
 							console.log("Error: " + error.result.error.message)

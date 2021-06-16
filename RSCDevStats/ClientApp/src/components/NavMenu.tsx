@@ -9,7 +9,6 @@ import {
 	NavLink,
 } from "reactstrap"
 import { Link } from "react-router-dom"
-import "./NavMenu.css"
 import styled from "styled-components"
 
 type State = {

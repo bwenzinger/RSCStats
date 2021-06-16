@@ -1,28 +1,28 @@
 import React, { useEffect } from "react"
 import styled from "styled-components"
-import BallchasingApi from "../BallchasingApi"
-import BallchasingApiRateLimited from "../BallchasingApiRateLimited"
+import BallchasingApi from "../../BallchasingApi"
+import BallchasingApiRateLimited from "../../BallchasingApiRateLimited"
 import {
 	BallChasingGroup,
 	BallChasingGroupStats,
-} from "../models/BallChasingApiModels"
-import { PlayerTrackerId } from "../models/PlayerTrackerId"
+} from "../../models/BallChasingApiModels"
+import { PlayerTrackerId } from "../../models/PlayerTrackerId"
 import { gapi } from "gapi-script"
 import {
 	CumulativePlayerStats,
 	IndividualGamePlayerStats,
-} from "../models/CumulativePlayerStats"
-import { ReplayPlayerStats, ReplayStatsRoot } from "../models/ReplayStats"
+} from "../../models/CumulativePlayerStats"
+import { ReplayPlayerStats, ReplayStatsRoot } from "../../models/ReplayStats"
 import {
 	BallChasingReplay,
 	BallChasingReplayPlayersEntity,
-} from "../models/BallChasingReplay"
+} from "../../models/BallChasingReplay"
 import { AgGridReact } from "ag-grid-react"
 // import WeeklyCumulativeStatsTableColDefs from "../models/WeeklyCumulativeStatsTableColDefs"
 import { GridOptions } from "ag-grid-community"
-import WeeklyPerGameStatsTableColDefs from "../models/WeeklyPerGameStatsTableColDefs"
-import WeeklyCumulativeStatsTableColDefs from "../models/WeeklyCumulativeStatsTableColDefs"
 import { Button, Modal, ModalBody, ModalFooter } from "reactstrap"
+import WeeklyCumulativeStatsTableColDefs from "../../models/ColDefs/WeeklyCumulativeStatsTableColDefs"
+import WeeklyPerGameStatsTableColDefs from "../../models/ColDefs/WeeklyPerGameStatsTableColDefs"
 // import { Schedule } from "./models/Scheduling"
 
 interface PassedProps {

@@ -1,7 +1,10 @@
 import React from "react"
 import styled from "styled-components"
 import ManualStatsEntry from "./ManualStatsEntry"
+import ManualStatsEntryNew from "./ManualStatsEntryNew"
 import StatsCongregate from "./StatsCongregate"
+// import { IconButton } from "@material-ui/core"
+// import NavigateNextIcon from "@material-ui/icons/NavigateNext"
 
 interface PassedProps {
 	className?: string
@@ -16,14 +19,18 @@ const StatsProcessing = (props: PassedProps) => {
 	return (
 		<div className={props.className + " stats-processing"}>
 			<div className="sideNavBar material-drop-shadow">
+				{/* <IconButton className="navBarButton">
+					Automatic
+					<NavigateNextIcon />
+				</IconButton> */}
 				<button
-					className="navBarButton"
+					className="navBarButton text-left"
 					onClick={() => setSelectedTab(AutomaticTab)}
 				>
 					Automatic
 				</button>
 				<button
-					className="navBarButton"
+					className="navBarButton text-left"
 					onClick={() => setSelectedTab(ManualTab)}
 				>
 					Manual Entry
@@ -34,7 +41,7 @@ const StatsProcessing = (props: PassedProps) => {
 					<StatsCongregate />
 				</div>
 			)}
-			{selectedTab === ManualTab && <ManualStatsEntry />}
+			{selectedTab === ManualTab && <ManualStatsEntryNew />}
 		</div>
 	)
 }
@@ -43,8 +50,6 @@ export default styled(StatsProcessing)`
 	height: calc(100% - 56px);
 	/* height: 100%; */
 	display: flex;
-	/* background-color: #171d30; */
-	/* background-color: green; */
 
 	.sideNavBar {
 		width: 200px;
@@ -57,6 +62,7 @@ export default styled(StatsProcessing)`
 		flex-direction: column;
 		background-color: #2a3045;
 		border-radius: 5px;
+		padding-top: 15px;
 		/* box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23); */
 	}
 
@@ -69,6 +75,7 @@ export default styled(StatsProcessing)`
 		:hover {
 			color: #54596a;
 		}
+		padding-left: 30px;
 	}
 
 	.stats-processing-content {

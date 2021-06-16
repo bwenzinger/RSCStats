@@ -7,10 +7,10 @@ import {
 } from "../models/CumulativePlayerStats"
 import { AgGridReact } from "ag-grid-react"
 import { GridOptions } from "ag-grid-community"
-import ViewStatsPerGameStatsTableColDefs from "../models/ViewStatsPerGameStatsTableColDefs"
-import ViewStatsCumulativeStatsTableColDefs from "../models/ViewStatsCumulativeStatsTableColDefs"
+import ViewStatsCumulativeStatsTableColDefs from "../models/ColDefs/ViewStatsCumulativeStatsTableColDefs"
 import { Button } from "reactstrap"
 import { nameof } from "../utils/utils"
+import ViewStatsPerGameStatsTableColDefs from "../models/ColDefs/ViewStatsPerGameStatsTableColDefs"
 
 interface PassedProps {
 	className?: string
