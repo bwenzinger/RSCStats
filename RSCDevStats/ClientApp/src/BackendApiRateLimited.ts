@@ -4,12 +4,12 @@ const MAX_REQUESTS_COUNT = 1
 const INTERVAL_MS = 100
 let PENDING_REQUESTS = 0
 
-export default class BallChasingApiRateLimited {
+export default class BackendApiRateLimited {
 	instance: AxiosInstance
 
 	public constructor() {
 		this.instance = axios.create({
-			baseURL: "https://localhost:44356/BallChasingApi/",
+			baseURL: "https://localhost:44356/",
 			timeout: 30000,
 		})
 

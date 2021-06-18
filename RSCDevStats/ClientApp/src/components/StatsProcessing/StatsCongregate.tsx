@@ -1,10 +1,11 @@
 import React, { useEffect } from "react"
 import styled from "styled-components"
-import BallchasingApi from "../../BallchasingApi"
-import BallchasingApiRateLimited from "../../BallchasingApiRateLimited"
+import BackendApi from "../../BackendApi"
+import BackendApiRateLimited from "../../BackendApiRateLimited"
 import {
 	BallChasingGroup,
 	BallChasingGroupStats,
+	TeamsEntity,
 } from "../../models/BallChasingApiModels"
 import { PlayerTrackerId } from "../../models/PlayerTrackerId"
 import { gapi } from "gapi-script"
@@ -23,6 +24,11 @@ import { GridOptions } from "ag-grid-community"
 import { Button, Modal, ModalBody, ModalFooter } from "reactstrap"
 import WeeklyCumulativeStatsTableColDefs from "../../models/ColDefs/WeeklyCumulativeStatsTableColDefs"
 import WeeklyPerGameStatsTableColDefs from "../../models/ColDefs/WeeklyPerGameStatsTableColDefs"
+import { atom, useRecoilState } from "recoil"
+import { PlayerContract } from "../../models/PlayerContract"
+import { LeagueTeam } from "../../models/LeagueTeam"
+import { MatchResult } from "../../models/MatchResult"
+import MatchResultsTableColDefs from "../../models/ColDefs/MatchResultsTableColDefs"
 // import { Schedule } from "./models/Scheduling"
 
 interface PassedProps {
@@ -32,18 +38,40 @@ interface PassedProps {
 	isDragActive?: boolean
 }
 
-// const trackerLinksSheetId = "1HLd_2yMGh_lX3adMLxQglWPIfRuiSiv587ABYnQX-0s"
+const playerTrackerIdsState = atom<PlayerTrackerId[] | undefined>({
+	key: "playerTrackerIds", // unique ID (with respect to other atoms/selectors)
+	default: undefined, // default value (aka initial value)
+})
 
-const rawStatsGoogleSheet = "1y4abHsJrmkdQAGGNW7ZAVpnrL3lZVN5Eh4bnsxWfHlo"
+const playerContractsState = atom<PlayerContract[] | undefined>({
+	key: "playerContracts", // unique ID (with respect to other atoms/selectors)
+	default: undefined, // default value (aka initial value)
+})
 
-const ballChasingApi = new BallchasingApi()
-const ballChasingApiRateLimited = new BallchasingApiRateLimited()
+const leagueTeamsState = atom<LeagueTeam[] | undefined>({
+	key: "leagueTeams", // unique ID (with respect to other atoms/selectors)
+	default: undefined, // default value (aka initial value)
+})
+
+// const rawStatsGoogleSheet = "1y4abHsJrmkdQAGGNW7ZAVpnrL3lZVN5Eh4bnsxWfHlo"
+
+const backendApi = new BackendApi()
+const backendApiRateLimited = new BackendApiRateLimited()
 
 const StatsCongregate = (props: PassedProps) => {
 	// const [schedule, setSchedule] = React.useState<Schedule[]>()
 
-	const [playerTrackerIds, setPlayerTrackerIds] =
-		React.useState<PlayerTrackerId[]>()
+	// const [playerTrackerIds, setPlayerTrackerIds] =
+	// 	React.useState<PlayerTrackerId[]>()
+
+	const [playerTrackerIds] = useRecoilState<PlayerTrackerId[] | undefined>(
+		playerTrackerIdsState
+	)
+
+	const [playerContracts, setPlayerContracts] =
+		useRecoilState(playerContractsState)
+
+	const [leagueTeams, setLeagueTeams] = useRecoilState(leagueTeamsState)
 
 	const [ballChasingSeasonGroups, setBallChasingSeasonGroups] =
 		React.useState<BallChasingGroup[]>()
@@ -55,22 +83,41 @@ const StatsCongregate = (props: PassedProps) => {
 		React.useState<BallChasingGroup>()
 	const [ballChasingDayGroups, setBallChasingDayGroups] =
 		React.useState<BallChasingGroup[]>()
+	const [ballChasingGroupedDayGroups, setBallChasingGroupedDayGroups] =
+		React.useState<BallChasingGroup[]>()
 	const [selectedDayGroup, setSelectedDayGroup] =
 		React.useState<BallChasingGroup>()
 	const [ballChasingTeamGroups, setBallChasingTeamGroups] =
 		React.useState<BallChasingGroup[]>()
 	const [showCumulativeStats, setShowCumulativeStats] =
+		React.useState<boolean>(true)
+
+	const [showSelectDayGroups, setShowSelectDayGroups] =
 		React.useState<boolean>(false)
 
 	const [isUploading, setIsUploading] = React.useState<boolean>(false)
 	const [showUploadingModal, setShowUploadingModal] =
 		React.useState<boolean>(false)
 
+	const [showMatchResults, setShowMatchResults] = React.useState<boolean>(true)
+
+	const [matchResults, setMatchResults] = React.useState<MatchResult[]>([])
+
 	const [gridOptions] = React.useState<GridOptions>({
 		rowSelection: "multiple",
 		defaultColDef: {
 			resizable: true,
 			sortable: true,
+			filter: true,
+		},
+	})
+
+	const [matchResultsGridOptions] = React.useState<GridOptions>({
+		rowSelection: "multiple",
+		defaultColDef: {
+			resizable: true,
+			sortable: true,
+			filter: true,
 		},
 	})
 
@@ -90,14 +137,18 @@ const StatsCongregate = (props: PassedProps) => {
 	const outStandingRequestsRef = React.useRef<number>(0)
 
 	useEffect(() => {
-		ballChasingApi.instance
-			.get<BallChasingGroup[]>(`GetGroupsByCreator/76561199096013422`) //this is the RSC steam
+		backendApi.instance
+			.get<BallChasingGroup[]>(
+				`BallChasingApi/GetGroupsByCreator/76561199096013422`
+			) //this is the RSC steam
 			.then(function (response) {
 				// handle success
 				const groupId = response.data.find((x) => x.name === "RSC")?.id
 
-				ballChasingApi.instance
-					.get<BallChasingGroup[]>(`GetGroupsByParentGroup/${groupId}`)
+				backendApi.instance
+					.get<BallChasingGroup[]>(
+						`BallChasingApi/GetGroupsByParentGroup/${groupId}`
+					)
 					.then(function (response) {
 						// handle success
 						setBallChasingSeasonGroups(response.data)
@@ -119,102 +170,6 @@ const StatsCongregate = (props: PassedProps) => {
 			})
 	}, [])
 
-	// useEffect(() => {
-	// 	const client = gapi.client as any
-
-	// 	client.sheets.spreadsheets.values
-	// 		.get({
-	// 			spreadsheetId: trackerLinksSheetId,
-	// 			range: "Link List",
-	// 		})
-	// 		.then(
-	// 			function (response: any) {
-	// 				const tempPlayerTrackerIds: PlayerTrackerId[] = []
-	// 				response.result.values.forEach((element: any) => {
-	// 					let trackerLink = element[2] as string
-
-	// 					let trackerPlatform = ""
-	// 					let trackerId = ""
-
-	// 					if (trackerLink.startsWith("http://")) {
-	// 						trackerLink = trackerLink.replace("http://", "https://") //just make them all https since it doesn't really matter
-	// 					}
-
-	// 					//some of the links include "rocket-league"
-	// 					if (trackerLink.includes("/rocket-league/")) {
-	// 						trackerLink = trackerLink.replace("/rocket-league", "")
-	// 					}
-
-	// 					if (trackerLink.includes("/xbl/")) {
-	// 						trackerLink = trackerLink.replace("/xbl", "/xbox") //not sure if there's a difference here?
-	// 					}
-
-	// 					if (trackerLink.includes("/ps/")) {
-	// 						trackerLink = trackerLink.replace("/ps/", "/psn/") //not sure if there's a difference here?
-	// 					}
-
-	// 					if (trackerLink.includes("steam")) {
-	// 						//steam
-	// 						trackerPlatform = "Steam"
-	// 						trackerId = trackerLink.split(
-	// 							"https://rocketleague.tracker.network/profile/steam/"
-	// 						)[1]
-	// 					} else if (trackerLink.includes("epic")) {
-	// 						//epic
-	// 						trackerPlatform = "Epic"
-	// 						//uri is in ASCII so we need to decode it
-	// 						trackerId = decodeURIComponent(trackerLink).split(
-	// 							"https://rocketleague.tracker.network/profile/epic/"
-	// 						)[1]
-	// 					} else if (trackerLink.includes("xbox")) {
-	// 						//xbox
-	// 						trackerPlatform = "Xbox"
-	// 						trackerId = decodeURIComponent(trackerLink).split(
-	// 							"https://rocketleague.tracker.network/profile/xbox/"
-	// 						)[1]
-	// 					} else if (trackerLink.includes("switch")) {
-	// 						//xbox
-	// 						trackerPlatform = "Switch"
-	// 						trackerId = trackerLink.split(
-	// 							"https://rocketleague.tracker.network/profile/switch/"
-	// 						)[1]
-	// 					} else {
-	// 						trackerPlatform = "PS4"
-	// 						//playstation
-	// 						trackerId = trackerLink.split(
-	// 							"https://rocketleague.tracker.network/profile/psn/"
-	// 						)[1]
-	// 					}
-
-	// 					// if (!trackerId) {
-	// 					//   console.log(trackerLink)
-	// 					//   console.log(trackerId)
-	// 					// }
-
-	// 					//if the tracker id still contains /overview at the end, remove it
-	// 					if (trackerId && trackerId.includes("/")) {
-	// 						trackerId = trackerId.split("/")[0]
-	// 					}
-
-	// 					tempPlayerTrackerIds.push({
-	// 						RSCId: element[0],
-	// 						Name: element[1],
-	// 						TrackerLink: element[2],
-	// 						platform: trackerPlatform,
-	// 						platformId: trackerId,
-	// 					})
-	// 				})
-	// 				// console.log("player tracker ids:")
-	// 				// console.log(tempPlayerTrackerIds)
-
-	// 				setPlayerTrackerIds(tempPlayerTrackerIds)
-	// 			},
-	// 			function (error: any) {
-	// 				console.log("Error: " + error.result.error.message)
-	// 			}
-	// 		)
-	// }, [])
-
 	React.useEffect(() => {
 		if (showCumulativeStats) {
 			gridOptions.api?.setRowData(perGamePlayerStats)
@@ -228,7 +183,6 @@ const StatsCongregate = (props: PassedProps) => {
 
 	return (
 		<div className={props.className + " Stats-Congregate"}>
-			{/* <ReplayUpload /> */}
 			<div className="headerBox">
 				{/* <button className="headerButton" onClick={onTestClick}>
 					test stats upload
@@ -267,6 +221,18 @@ const StatsCongregate = (props: PassedProps) => {
 							))}
 						</div>
 					)}
+				{showSelectDayGroups &&
+					ballChasingGroupedDayGroups &&
+					!ballChasingDayGroups &&
+					ballChasingGroupedDayGroups.map((element) => (
+						<Button
+							className="ballchasing-group-button action-button-color material-drop-shadow"
+							onClick={() => onGroupedDayGroupClick(element)}
+							key={"ballchasing-group-" + element.name}
+						>
+							{element.name}
+						</Button>
+					))}
 				{selectedDayGroup && <div>Selected: {selectedDayGroup.name}</div>}
 				{!selectedDayGroup && selectedLeagueGroup && ballChasingDayGroups && (
 					<div>Please select a day</div>
@@ -292,15 +258,31 @@ const StatsCongregate = (props: PassedProps) => {
 						>
 							Export to excel
 						</Button>,
-						<Button
-							className="toggleStatsViewButton action-button-color material-drop-shadow"
-							onClick={() => setShowCumulativeStats(!showCumulativeStats)}
-						>
-							Toggle per game/cumulative stats
-						</Button>,
+						showCumulativeStats && (
+							<Button
+								className="toggleStatsViewButton action-button-color material-drop-shadow"
+								onClick={() => setShowCumulativeStats(false)}
+							>
+								Show Per Game Stats
+							</Button>
+						),
+						!showCumulativeStats && (
+							<Button
+								className="toggleStatsViewButton action-button-color material-drop-shadow"
+								onClick={() => setShowCumulativeStats(true)}
+							>
+								Show Cumulative Stats
+							</Button>
+						),
 					]}
-				<div>outstanding: {outStandingRequests}</div>
-				<div>processed: {processedRequests}</div>
+				<div className="requests-container">
+					<div className="requests-container-item">
+						outstanding ballchasing requests: {outStandingRequests}
+					</div>
+					<div className="requests-container-item">
+						completed ballchasing requests: {processedRequests}
+					</div>
+				</div>
 			</div>
 
 			{ballChasingTeamGroups &&
@@ -309,7 +291,17 @@ const StatsCongregate = (props: PassedProps) => {
 						className={"ag-theme-material stats-grid"}
 						// style={{ height: "1000px", width: "100%" }}
 					>
-						{!showCumulativeStats && (
+						{showMatchResults && (
+							<AgGridReact
+								gridOptions={matchResultsGridOptions}
+								columnDefs={MatchResultsTableColDefs}
+								// onGridReady={(params) => {
+								// 	params.api?.sizeColumnsToFit()
+								// }}
+								// rowData={matchResults}
+							/>
+						)}
+						{!showMatchResults && !showCumulativeStats && (
 							<AgGridReact
 								gridOptions={gridOptions}
 								columnDefs={WeeklyPerGameStatsTableColDefs}
@@ -319,7 +311,7 @@ const StatsCongregate = (props: PassedProps) => {
 								// rowData={props.playerStats}
 							/>
 						)}
-						{showCumulativeStats && (
+						{!showMatchResults && showCumulativeStats && (
 							<AgGridReact
 								gridOptions={gridOptions}
 								columnDefs={WeeklyCumulativeStatsTableColDefs}
@@ -331,9 +323,33 @@ const StatsCongregate = (props: PassedProps) => {
 						)}
 					</div>,
 					<div className="footerBox">
-						<Button color="success" onClick={uploadSelectedStats}>
-							Upload Selected Stats
-						</Button>
+						{showMatchResults && (
+							<Button
+								className="skip-button material-drop-shadow"
+								color="secondary"
+								onClick={() => setShowMatchResults(false)}
+							>
+								Skip
+							</Button>
+						)}
+						{showMatchResults && (
+							<Button
+								className="material-drop-shadow"
+								color="success"
+								onClick={uploadMatchResults}
+							>
+								Upload Selected Match Results
+							</Button>
+						)}
+						{!showMatchResults && (
+							<Button
+								className="material-drop-shadow"
+								color="success"
+								onClick={uploadSelectedStats}
+							>
+								Upload Selected Stats
+							</Button>
+						)}
 					</div>,
 				]}
 			<Modal isOpen={showUploadingModal}>
@@ -352,6 +368,29 @@ const StatsCongregate = (props: PassedProps) => {
 			{/* <StatsTable playerStats={playerStats} /> */}
 		</div>
 	)
+
+	function uploadMatchResults() {
+		setShowUploadingModal(true)
+		setIsUploading(true)
+		let matchesToUpload: IndividualGamePlayerStats[] = []
+		matchResultsGridOptions.api?.getSelectedNodes().forEach((node) => {
+			matchesToUpload.push(node.data)
+		})
+
+		backendApi.instance
+			.post<MatchResult[]>(`MatchResults/InsertMatchResults`, matchesToUpload)
+			.then(function (response) {
+				// handle success
+				setIsUploading(false)
+			})
+			.catch(function (error) {
+				// handle error
+				console.log(error)
+			})
+			.then(function () {
+				// always executed
+			})
+	}
 
 	function uploadSelectedStats() {
 		setShowUploadingModal(true)
@@ -374,9 +413,9 @@ const StatsCongregate = (props: PassedProps) => {
 			})
 		}
 
-		ballChasingApi.instance
+		backendApi.instance
 			.post<IndividualGamePlayerStats[]>(
-				`InsertWeeklyStats`,
+				`PlayerStats/InsertWeeklyStats`,
 				playerStatsToUpload
 			)
 			.then(function (response) {
@@ -399,8 +438,10 @@ const StatsCongregate = (props: PassedProps) => {
 	function onSeasonGroupClick(group: BallChasingGroup) {
 		setSelectedSeasonGroup(group)
 
-		ballChasingApi.instance
-			.get<BallChasingGroup[]>(`GetGroupsByParentGroup/${group.id}`)
+		backendApi.instance
+			.get<BallChasingGroup[]>(
+				`BallChasingApi/GetGroupsByParentGroup/${group.id}`
+			)
 			.then(function (response) {
 				// handle success
 				setBallChasingLeagueGroups(response.data)
@@ -415,15 +456,24 @@ const StatsCongregate = (props: PassedProps) => {
 	}
 
 	function onLeagueGroupClick(group: BallChasingGroup) {
-		setSelectedLeagueGroup(group)
-		ballChasingApi.instance
-			.get<BallChasingGroup[]>(`GetGroupsByParentGroup/${group.id}`)
+		if (group.name.match(/^\d/)) {
+			setSelectedLeagueGroup({
+				...group,
+				name: group.name.substring(1, group.name.length),
+			})
+		} else {
+			setSelectedLeagueGroup(group)
+		}
+		backendApi.instance
+			.get<BallChasingGroup[]>(
+				`BallChasingApi/GetGroupsByParentGroup/${group.id}`
+			)
 			.then(function (response) {
 				// handle success
 				if (response.data.length === 1) {
-					ballChasingApi.instance
+					backendApi.instance
 						.get<BallChasingGroup[]>(
-							`GetGroupsByParentGroup/${response.data[0].id}`
+							`BallChasingApi/GetGroupsByParentGroup/${response.data[0].id}`
 						)
 						.then(function (response) {
 							// handle success
@@ -436,6 +486,9 @@ const StatsCongregate = (props: PassedProps) => {
 						.then(function () {
 							// always executed
 						})
+				} else if (response.data.length === 2) {
+					setShowSelectDayGroups(true)
+					setBallChasingGroupedDayGroups(response.data)
 				} else {
 					setBallChasingDayGroups(response.data)
 				}
@@ -449,10 +502,33 @@ const StatsCongregate = (props: PassedProps) => {
 			})
 	}
 
+	function onGroupedDayGroupClick(group: BallChasingGroup) {
+		// setSelectedGroupedDayGroup(group)
+		backendApi.instance
+			.get<BallChasingGroup[]>(
+				`BallChasingApi/GetGroupsByParentGroup/${group.id}`
+			)
+			.then(function (response) {
+				// handle success
+				setBallChasingDayGroups(response.data)
+			})
+			.catch(function (error) {
+				// handle error
+				console.log(error)
+			})
+			.then(function () {
+				// always executed
+			})
+	}
+
 	function onDayGroupClick(group: BallChasingGroup) {
 		setSelectedDayGroup(group)
-		ballChasingApi.instance
-			.get<BallChasingGroup[]>(`GetGroupsByParentGroup/${group.id}`)
+
+		const groupInt = parseInt(group?.name.match(/\d+/g)?.toString() ?? "") ?? -1
+		backendApi.instance
+			.get<BallChasingGroup[]>(
+				`BallChasingApi/GetGroupsByParentGroup/${group.id}`
+			)
 			.then(function (response) {
 				// handle success
 				setBallChasingTeamGroups(response.data)
@@ -460,24 +536,67 @@ const StatsCongregate = (props: PassedProps) => {
 				let tempPlayerStats: CumulativePlayerStats[] = []
 				let tempPlayerStatsByGame: IndividualGamePlayerStats[] = []
 
+				let tempMatchResults: MatchResult[] = []
+
 				// let timeout = 0
 				// let numberResponsesProcessed = 0
 				response.data.forEach((item) => {
 					// timeout += 1000
 					// setTimeout(function () {
-					ballChasingApiRateLimited.instance
-						.get<BallChasingGroupStats>(`GetGroupById/${item.id}`)
+					backendApiRateLimited.instance
+						.get<BallChasingGroupStats>(
+							`BallChasingApi/GetGroupById/${item.id}`
+						)
 						.then(function (getDayGroupByIdResponse) {
-							ballChasingApiRateLimited.instance
-								.get<ReplayStatsRoot>(`GetReplaysByGroup/${item.id}`)
+							const teams = getDayGroupByIdResponse.data.teams
+							if (teams) {
+								const team1: TeamsEntity = teams[0]
+								const team2: TeamsEntity = teams[1]
+								if (team1 && team2 && team1.players && team2.players) {
+									const mappedTeam1Players = team1.players.map((x) => x.id)
+									const team1Players = playerContracts?.filter(
+										(x) => mappedTeam1Players.includes(x.OnlineId) && x.Team
+									)
+									const mappedTeam2Players = team2.players.map((x) => x.id)
+									const team2Players = playerContracts?.filter(
+										(x) => mappedTeam2Players.includes(x.OnlineId) && x.Team
+									)
+									if (team1Players && team2Players) {
+										const team1LeagueTeam = leagueTeams!.find(
+											(x) => x.TeamName === team1Players[0].Team
+										)
+										const team2LeagueTeam = leagueTeams!.find(
+											(x) => x.TeamName === team2Players[0].Team
+										)
+
+										tempMatchResults.push({
+											Tier: selectedLeagueGroup!.name,
+											Week: groupInt,
+											HomeTeam: team1LeagueTeam!.TeamName,
+											AwayTeam: team2LeagueTeam!.TeamName,
+											HomeTeamWins: team1.cumulative.wins,
+											AwayTeamWins: team2.cumulative.wins,
+										})
+										setMatchResults(tempMatchResults)
+										matchResultsGridOptions.api?.setRowData(tempMatchResults)
+									}
+								}
+							}
+
+							backendApiRateLimited.instance
+								.get<ReplayStatsRoot>(
+									`BallChasingApi/GetReplaysByGroup/${item.id}`
+								)
 								.then(function (getReplaysForDayGroupResponse) {
 									const detailedReplays: BallChasingReplay[] = []
 
 									getReplaysForDayGroupResponse.data.list?.forEach((replay) => {
 										outStandingRequestsRef.current++
 										setOutStandingRequests(outStandingRequestsRef.current)
-										ballChasingApiRateLimited.instance
-											.get<BallChasingReplay>(`GetReplayById/${replay.id}`)
+										backendApiRateLimited.instance
+											.get<BallChasingReplay>(
+												`BallChasingApi/GetReplayById/${replay.id}`
+											)
 											.then(function (getSingleReplayResponse) {
 												processedRequestsRef.current++
 												setProcessedRequests(processedRequestsRef.current)
@@ -583,12 +702,7 @@ const StatsCongregate = (props: PassedProps) => {
 																			OnlineId: groupPlayerBeingProcessed.id,
 																			ReplayId: replay.id!!,
 																			ReplayTitle: replay.title ?? "",
-																			Week:
-																				parseInt(
-																					group?.name
-																						.match(/\d+/g)
-																						?.toString() ?? ""
-																				) ?? -1,
+																			Week: groupInt,
 																			Tier: selectedLeagueGroup?.name ?? "",
 																			Team: groupPlayerBeingProcessed.team, //TODO THIS SHOULD COME FROM RSC SOMEWHERE
 																			OponentTeam:
@@ -800,119 +914,135 @@ const StatsCongregate = (props: PassedProps) => {
 															})
 
 															if (foundPlayer) {
-																// tempPlayerStats.push({
-																// 	Name: groupPlayerBeingProcessed.name,
-																// 	RSCId: foundPlayer?.RSCId,
-																// 	Tier: selectedLeagueGroup?.name ?? "",
-																// 	Team: groupPlayerBeingProcessed.team, //TODO THIS SHOULD COME FROM RSC SOMEWHERE
-																// 	GamesPlayed:
-																// 	GamesWon:
-																// 		groupPlayerBeingProcessed.cumulative.wins,
-																// 	GamesLost:
-																// 		groupPlayerBeingProcessed.cumulative.games -
-																// 		groupPlayerBeingProcessed.cumulative.wins,
-																// 	Score:
-																// 		groupPlayerBeingProcessed.cumulative.core
-																// 			.score,
-																// 	Goals:
-																// 		groupPlayerBeingProcessed.cumulative.core
-																// 			.goals,
-																// 	Assists:
-																// 		groupPlayerBeingProcessed.cumulative.core
-																// 			.assists,
-																// 	Saves:
-																// 		groupPlayerBeingProcessed.cumulative.core
-																// 			.saves,
-																// 	Shots:
-																// 		groupPlayerBeingProcessed.cumulative.core
-																// 			.shots,
-																// 	MVPs: playerStatsFromReplays.filter(
-																// 		(x) => x.mvp === true
-																// 	).length,
-																// 	Cycle: playerIndividualReplayStats.filter(
-																// 		(x) =>
-																// 			x.stats.core.goals > 0 &&
-																// 			x.stats.core.assists > 0 &&
-																// 			x.stats.core.saves > 0 &&
-																// 			x.stats.core.shots > 0
-																// 	).length,
-																// 	HatTrick: playerIndividualReplayStats.filter(
-																// 		(x) => x.stats.core.goals > 2
-																// 	).length,
-																// 	Playmaker: playerIndividualReplayStats.filter(
-																// 		(x) => x.stats.core.assists > 2
-																// 	).length,
-																// 	Savior: playerIndividualReplayStats.filter(
-																// 		(x) => x.stats.core.saves > 2
-																// 	).length,
-																// 	// PointsAgainst: playerIndividualReplayStats.fore
-																// 	GoalsAgainst:
-																// 		groupPlayerBeingProcessed.cumulative.core
-																// 			.goals_against,
-																// 	// AssistAgainst: groupPlayerBeingProcessed.cumulative.core
-																// 	// .goals_against
-																// 	// SavesAgainst: number
-																// 	ShotsAgainst:
-																// 		groupPlayerBeingProcessed.cumulative.core
-																// 			.shots_against,
-																// 	bpm: groupPlayerBeingProcessed.cumulative
-																// 		.boost.bpm,
-																// 	// AvgBoostAmount: number
-																// 	// BoostCollected: number
-																// 	// BoostCollectedBigPads: number
-																// 	// BoostCollectedSmallPads: number
-																// 	// CountCollectedBigPads: number
-																// 	// CountCollectedSmallPads: number
-																// 	// BoostStolen: number
-																// 	// BoostStolenBigPads: number
-																// 	// BoostStolenSmallPads: number
-																// 	// CountStolenBigPads: number
-																// 	// CountStolenSmallpads: number
-																// 	// ZeroBoostTime: number
-																// 	// HundredBoostTime: number
-																// 	// BoostUsedWhileSupersonic: number
-																// 	// BoostOverfillTotal: number
-																// 	// BoostOverfillStolen: number
-																// 	// AverageSpeed: number
-																// 	// TotalDistance: number
-																// 	// TimeSlowSpeed: number
-																// 	// PercentSlowSpeed: number
-																// 	// TimeBoostSpeed: number
-																// 	// PercentBoostSpeed: number
-																// 	// TimeSupersonic: number
-																// 	// PercentSupersonic: number
-																// 	// TimeOnGround: number
-																// 	// PercentOnGround: number
-																// 	// TimeLowAir: number
-																// 	// PercentLowAir: number
-																// 	// TimeHighAir: number
-																// 	// PercentHighAir: number
-																// 	// TimePowerslide: number
-																// 	// AveragePowerslideTime: number
-																// 	// CountPowerslide: number
-																// 	// TimeMostBack: number
-																// 	// PercentMostBack: number
-																// 	// TimeMostForward: number
-																// 	// PercentMostForward: number
-																// 	// TimeInFrontOfBall: number
-																// 	// PercentInFrontOfBall: number
-																// 	// TimeDefensiveHalf: number
-																// 	// PercentDefensiveHalf: number
-																// 	// TimeOffensiveHalf: number
-																// 	// PercentOffensiveHalf: number
-																// 	// TimeDefensiveThird: number
-																// 	// PercentageDefensiveThird: number
-																// 	// TimeNeutralThird: number
-																// 	// PercentNeutralThird: number
-																// 	// TimeOffensiveThird: number
-																// 	// PercentOffensiveThird: number
-																// 	// AverageDistanceToBall: number
-																// 	// AverageDistanceToBallHasPossession: number
-																// 	// AverageDistanceToBallNoPossession: number
-																// 	// DemosInflicted: number
-																// 	// DemosTaken: number
-																// 	// LossMVP: number
-																// })
+																if (
+																	tempPlayerStats.some(
+																		(x) => x.RSCId === foundPlayer!!.RSCId
+																	)
+																) {
+																	const playerStat = tempPlayerStats.find(
+																		(x) => x.RSCId === foundPlayer!!.RSCId
+																	)
+																	if (playerStat) {
+																		// const test =
+																		// 	groupPlayerBeingProcessed.cumulative.games
+																		playerStat.GamesPlayed! +=
+																			groupPlayerBeingProcessed.cumulative.games
+																	}
+																	playerStat!!.GamesPlayed! +=
+																		groupPlayerBeingProcessed.cumulative.games
+																	playerStat!!.GamesWon! +=
+																		groupPlayerBeingProcessed.cumulative.wins
+																	playerStat!!.GamesLost! +=
+																		groupPlayerBeingProcessed.cumulative.games -
+																		groupPlayerBeingProcessed.cumulative.wins
+																	playerStat!!.Score! +=
+																		groupPlayerBeingProcessed.cumulative.core.score
+																	playerStat!!.Goals! +=
+																		groupPlayerBeingProcessed.cumulative.core.goals
+																	playerStat!!.Assists! +=
+																		groupPlayerBeingProcessed.cumulative.core.assists
+																	playerStat!!.Saves! +=
+																		groupPlayerBeingProcessed.cumulative.core.saves
+																	playerStat!!.Shots! +=
+																		groupPlayerBeingProcessed.cumulative.core.shots
+																	playerStat!!.MVPs! =
+																		tempPlayerStatsByGame.filter(
+																			(x) =>
+																				x.RSCId === foundPlayer!.RSCId &&
+																				x.MVP === true
+																		)?.length
+																	playerStat!!.Cycle! +=
+																		playerIndividualReplayStats.filter(
+																			(x) =>
+																				x.stats.core.goals > 0 &&
+																				x.stats.core.assists > 0 &&
+																				x.stats.core.saves > 0 &&
+																				x.stats.core.shots > 0
+																		).length
+																	playerStat!!.HatTrick! +=
+																		playerIndividualReplayStats.filter(
+																			(x) => x.stats.core.goals > 2
+																		).length
+																	playerStat!!.Playmaker! +=
+																		playerIndividualReplayStats.filter(
+																			(x) => x.stats.core.assists > 2
+																		).length
+																	playerStat!!.Savior! +=
+																		playerIndividualReplayStats.filter(
+																			(x) => x.stats.core.saves > 2
+																		).length
+																	playerStat!!.GoalsAgainst! +=
+																		groupPlayerBeingProcessed.cumulative.core.goals_against
+																	playerStat!!.ShotsAgainst! +=
+																		groupPlayerBeingProcessed.cumulative.core.shots_against
+																	// PointsAgainst
+																	// AssistAgainst
+																	// SavesAgainst
+																} else {
+																	tempPlayerStats.push({
+																		Name: groupPlayerBeingProcessed.name,
+																		RSCId: foundPlayer?.RSCId,
+																		Tier: selectedLeagueGroup?.name ?? "",
+																		Team: groupPlayerBeingProcessed.team, //TODO THIS SHOULD COME FROM RSC SOMEWHERE
+																		GamesPlayed:
+																			groupPlayerBeingProcessed.cumulative
+																				.games,
+																		GamesWon:
+																			groupPlayerBeingProcessed.cumulative.wins,
+																		GamesLost:
+																			groupPlayerBeingProcessed.cumulative
+																				.games -
+																			groupPlayerBeingProcessed.cumulative.wins,
+																		Score:
+																			groupPlayerBeingProcessed.cumulative.core
+																				.score,
+																		Goals:
+																			groupPlayerBeingProcessed.cumulative.core
+																				.goals,
+																		Assists:
+																			groupPlayerBeingProcessed.cumulative.core
+																				.assists,
+																		Saves:
+																			groupPlayerBeingProcessed.cumulative.core
+																				.saves,
+																		Shots:
+																			groupPlayerBeingProcessed.cumulative.core
+																				.shots,
+																		MVPs: tempPlayerStatsByGame.filter(
+																			(x) =>
+																				x.RSCId === foundPlayer!.RSCId &&
+																				x.MVP === true
+																		)?.length,
+																		Cycle: playerIndividualReplayStats.filter(
+																			(x) =>
+																				x.stats.core.goals > 0 &&
+																				x.stats.core.assists > 0 &&
+																				x.stats.core.saves > 0 &&
+																				x.stats.core.shots > 0
+																		).length,
+																		HatTrick:
+																			playerIndividualReplayStats.filter(
+																				(x) => x.stats.core.goals > 2
+																			).length,
+																		Playmaker:
+																			playerIndividualReplayStats.filter(
+																				(x) => x.stats.core.assists > 2
+																			).length,
+																		Savior: playerIndividualReplayStats.filter(
+																			(x) => x.stats.core.saves > 2
+																		).length,
+																		// PointsAgainst: playerIndividualReplayStats.fore
+																		GoalsAgainst:
+																			groupPlayerBeingProcessed.cumulative.core
+																				.goals_against,
+																		// AssistAgainst: groupPlayerBeingProcessed.cumulative.core
+																		// .goals_against
+																		// SavesAgainst: number
+																		ShotsAgainst:
+																			groupPlayerBeingProcessed.cumulative.core
+																				.shots_against,
+																	})
+																}
 															} else {
 																console.log("handle missing player:")
 																console.log(groupPlayerBeingProcessed)
@@ -969,62 +1099,62 @@ const StatsCongregate = (props: PassedProps) => {
 			})
 	}
 
-	function onTestClick() {
-		ballChasingApi.instance
-			.get<BallChasingGroupStats>(`GetGroupById/test-99u4wfwt1u`) //TODO UN-HARDCODE THIS
-			.then(function (response) {
-				const playerStatValues: [(string | number)[]] = [[]]
+	// function onTestClick() {
+	// 	ballChasingApi.instance
+	// 		.get<BallChasingGroupStats>(`BallChasingApi/GetGroupById/test-99u4wfwt1u`) //TODO UN-HARDCODE THIS
+	// 		.then(function (response) {
+	// 			const playerStatValues: [(string | number)[]] = [[]]
 
-				// handle success
-				console.log("test group:")
-				console.log(response.data)
-				response.data.players?.forEach((player) => {
-					const foundPlayer = playerTrackerIds?.find(
-						(x) => x.platformId?.toUpperCase() === player.id?.toUpperCase()
-					)
-					console.log(foundPlayer)
-					playerStatValues.push([
-						foundPlayer?.RSCId ?? "unknown player",
-						"", //tier
-						foundPlayer?.Name ?? "unknown player",
-						"", //team
-						"test day",
-						player.cumulative.wins,
-						player.cumulative.games - player.cumulative.wins,
-						player.cumulative.core.mvp,
-						player.cumulative.core.score,
-					])
-				})
+	// 			// handle success
+	// 			console.log("test group:")
+	// 			console.log(response.data)
+	// 			response.data.players?.forEach((player) => {
+	// 				const foundPlayer = playerTrackerIds?.find(
+	// 					(x) => x.platformId?.toUpperCase() === player.id?.toUpperCase()
+	// 				)
+	// 				console.log(foundPlayer)
+	// 				playerStatValues.push([
+	// 					foundPlayer?.RSCId ?? "unknown player",
+	// 					"", //tier
+	// 					foundPlayer?.Name ?? "unknown player",
+	// 					"", //team
+	// 					"test day",
+	// 					player.cumulative.wins,
+	// 					player.cumulative.games - player.cumulative.wins,
+	// 					player.cumulative.core.mvp,
+	// 					player.cumulative.core.score,
+	// 				])
+	// 			})
 
-				const client = gapi.client as any
+	// 			const client = gapi.client as any
 
-				client.sheets.spreadsheets.values
-					.append({
-						spreadsheetId: rawStatsGoogleSheet,
-						majorDimension: "ROWS",
-						range: "Sheet1",
-						valueInputOption: "USER_ENTERED",
-						values: playerStatValues,
-					})
-					.then(
-						function (response: any) {
-							console.log("append response:")
-							// console.log(response.result)
-							console.log(response)
-						},
-						function (error: any) {
-							console.log("Error: " + error.result.error.message)
-						}
-					)
-			})
-			.catch(function (error) {
-				// handle error
-				console.log(error)
-			})
-			.then(function () {
-				// always executed
-			})
-	}
+	// 			client.sheets.spreadsheets.values
+	// 				.append({
+	// 					spreadsheetId: rawStatsGoogleSheet,
+	// 					majorDimension: "ROWS",
+	// 					range: "Sheet1",
+	// 					valueInputOption: "USER_ENTERED",
+	// 					values: playerStatValues,
+	// 				})
+	// 				.then(
+	// 					function (response: any) {
+	// 						console.log("append response:")
+	// 						// console.log(response.result)
+	// 						console.log(response)
+	// 					},
+	// 					function (error: any) {
+	// 						console.log("Error: " + error.result.error.message)
+	// 					}
+	// 				)
+	// 		})
+	// 		.catch(function (error) {
+	// 			// handle error
+	// 			console.log(error)
+	// 		})
+	// 		.then(function () {
+	// 			// always executed
+	// 		})
+	// }
 }
 
 export default styled(StatsCongregate)`
@@ -1032,6 +1162,7 @@ export default styled(StatsCongregate)`
 	display: flex;
 	flex-direction: column;
 	height: calc(100% - 50px);
+	width: calc(100% - 50px);
 
 	.headerBox {
 		flex: 0;
@@ -1057,9 +1188,21 @@ export default styled(StatsCongregate)`
 	.stats-grid {
 		height: 100%;
 		width: 100%;
+		overflow: hidden;
 	}
 
 	.toggleStatsViewButton {
 		width: 300px;
+	}
+
+	.requests-container {
+		width: 100%;
+		display: flex;
+	}
+	.requests-container-item {
+		margin-right: 50px;
+	}
+	.skip-button {
+		margin-right: 20px;
 	}
 `

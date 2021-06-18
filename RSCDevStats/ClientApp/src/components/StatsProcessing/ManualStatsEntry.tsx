@@ -9,15 +9,14 @@ import { ManualPlayerStatsEntry } from "../../models/ManualPlayerStatsEntry"
 import { v4 as uuidv4 } from "uuid"
 import { Modal, ModalBody, ModalFooter, Button } from "reactstrap"
 import { IndividualGamePlayerStats } from "../../models/CumulativePlayerStats"
-import produce from "immer"
 import ManualStatsEntryList from "./ManualStatsEntryList"
-import BallchasingApi from "../../BallchasingApi"
+import BackendApi from "../../BackendApi"
 
 interface Props {
 	className?: string
 }
 
-const ballChasingApi = new BallchasingApi()
+const backendApi = new BackendApi()
 
 const playerTrackerIdsState = atom<PlayerTrackerId[] | undefined>({
 	key: "playerTrackerIds", // unique ID (with respect to other atoms/selectors)
@@ -244,9 +243,9 @@ const ManualStatsEntry = (props: Props) => {
 			})
 		})
 
-		ballChasingApi.instance
+		backendApi.instance
 			.post<IndividualGamePlayerStats[]>(
-				`InsertWeeklyStats`,
+				`PlayerStats/InsertWeeklyStats`,
 				playerStatsToUpload
 			)
 			.then(function (response) {

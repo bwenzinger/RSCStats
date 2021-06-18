@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import styled from "styled-components"
-import BallchasingApi from "../BallchasingApi"
+import BackendApi from "../BackendApi"
 import {
 	CumulativePlayerStats,
 	IndividualGamePlayerStats,
@@ -16,7 +16,7 @@ interface PassedProps {
 	className?: string
 }
 
-const ballChasingApi = new BallchasingApi()
+const ballChasingApi = new BackendApi()
 
 const ViewStats = (props: PassedProps) => {
 	const [cumulativePlayerStats, setCumulativePlayerStats] = React.useState<
@@ -42,7 +42,7 @@ const ViewStats = (props: PassedProps) => {
 
 	useEffect(() => {
 		ballChasingApi.instance
-			.get<IndividualGamePlayerStats[]>(`GetAllWeeklyStats`)
+			.get<IndividualGamePlayerStats[]>(`PlayerStats/GetAllWeeklyStats`)
 			.then(function (response) {
 				// handle success
 				setPerGamePlayerStats(response.data)

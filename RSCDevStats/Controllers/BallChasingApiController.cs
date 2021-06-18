@@ -147,47 +147,5 @@ namespace RSCWebApi.Controllers
 
             return response.Data;
         }
-
-        [HttpGet]
-        [Route("GetAllWeeklyStats")]
-        public List<IndividualGamePlayerStatsDB> GetAllIndividualGameStats()
-        {
-            var toReturn = new List<IndividualGamePlayerStatsDB>();
-            using (var db = new EntityFrameworkDatabaseContext(_configuration))
-            {
-                toReturn = db.IndividualGamePlayerStatsDB.ToList();
-            }
-
-            return toReturn;
-        }
-
-        [HttpPost]
-        [Route("InsertWeeklyStat")]
-        public IndividualGamePlayerStatsDB InsertWeeklyStat(IndividualGamePlayerStatsDB model)
-        {
-            using (var db = new EntityFrameworkDatabaseContext(_configuration))
-            {
-                var entity = db.IndividualGamePlayerStatsDB.Add(model).Entity;
-                db.SaveChanges();
-                return entity;
-            }
-        }
-
-        [HttpPost]
-        [Route("InsertWeeklyStats")]
-        public void InsertWeeklyStats(List<IndividualGamePlayerStatsDB> models)
-        {
-            using (var db = new EntityFrameworkDatabaseContext(_configuration))
-            {
-                var matchingPlayers = db.IndividualGamePlayerStatsDB.Where(x => models.Select(y => y.RSCId + y.ReplayId).Contains(x.RSCId + x.ReplayId));
-
-                var entriesNotYetInDb = models.Where(x => !matchingPlayers.Any(y => y.ReplayId == x.ReplayId && y.RSCId == x.RSCId));
-
-                db.IndividualGamePlayerStatsDB.AddRange(entriesNotYetInDb);
-                db.SaveChanges();
-                
-                return;
-            }
-        }
     }
 }

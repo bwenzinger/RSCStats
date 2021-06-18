@@ -11,6 +11,7 @@ namespace RSCWebApi
     public class EntityFrameworkDatabaseContext : DbContext
     {
         public DbSet<IndividualGamePlayerStatsDB> IndividualGamePlayerStatsDB { get; set; }
+        public DbSet<MatchResultsDB> MatchResultsDB { get; set; }
         private IConfiguration _configuration;
 
         public EntityFrameworkDatabaseContext(IConfiguration configuration)
@@ -27,28 +28,9 @@ namespace RSCWebApi
         {
             modelBuilder.Entity<IndividualGamePlayerStatsDB>()
                 .HasKey(c => new { c.RSCId, c.ReplayId });
+
+            modelBuilder.Entity<MatchResultsDB>()
+                .HasKey(c => new { c.Tier, c.Week, c.HomeTeam, c.AwayTeam });
         }
-
-        //[Table("weekly_player_stats")]
-        //public class WeeklyPlayerStatDB
-        //{
-        //    [Key, Column("rsc_id")]
-        //    public string RSCId { get; set; }
-
-        //    public int week { get; set; }
-        //    public string name { get; set; }
-        //    public int games_won { get; set; }
-        //}
-        //[Table("individual_game_player_stats")]
-        //public class IndividualGamePlayerStatsDB
-        //{
-        //    [Key, Column("rsc_id")]
-        //    public string RSCId { get; set; }
-
-        //    public int week { get; set; }
-        //    public string name { get; set; }
-        //    public int games_won { get; set; }
-        //    public int games_lost { get; set; }
-        //}
     }
 }

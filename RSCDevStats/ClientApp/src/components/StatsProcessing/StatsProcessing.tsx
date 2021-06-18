@@ -14,7 +14,7 @@ const AutomaticTab = "AUTOMATIC"
 const ManualTab = "MANUAL"
 
 const StatsProcessing = (props: PassedProps) => {
-	const [selectedTab, setSelectedTab] = React.useState<string>(ManualTab)
+	const [selectedTab, setSelectedTab] = React.useState<string>(AutomaticTab)
 
 	return (
 		<div className={props.className + " stats-processing"}>
@@ -24,7 +24,10 @@ const StatsProcessing = (props: PassedProps) => {
 					<NavigateNextIcon />
 				</IconButton> */}
 				<button
-					className="navBarButton text-left"
+					className={
+						"navBarButton text-left" +
+						(selectedTab === AutomaticTab ? " bold-button-text" : "")
+					}
 					onClick={() => setSelectedTab(AutomaticTab)}
 				>
 					Automatic
@@ -52,7 +55,7 @@ export default styled(StatsProcessing)`
 	display: flex;
 
 	.sideNavBar {
-		width: 200px;
+		/* width: 200px; */
 		/* height: calc(100% - 56px); */
 		margin-top: 20px;
 		margin-bottom: 20px;
@@ -63,6 +66,7 @@ export default styled(StatsProcessing)`
 		background-color: #2a3045;
 		border-radius: 5px;
 		padding-top: 15px;
+		flex: 0 0 200px;
 		/* box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23); */
 	}
 
@@ -85,5 +89,9 @@ export default styled(StatsProcessing)`
 		background-color: #2a3045;
 		border-radius: 5px;
 		width: 100%;
+	}
+
+	.bold-button-text {
+		font-weight: bold;
 	}
 `

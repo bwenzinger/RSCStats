@@ -65,9 +65,9 @@ class NavMenu extends Component<Props, State> {
 						> */}
 				{/* <ul className="navbar-nav flex-grow"> */}
 				{/* <NavItem> */}
-				<NavLink tag={Link} className="navmenu-navlink" to="/">
+				{/* <NavLink tag={Link} className="navmenu-navlink" to="/">
 					Home
-				</NavLink>
+				</NavLink> */}
 				{/* </NavItem>
 						<NavItem> */}
 				<NavLink tag={Link} className="navmenu-navlink" to="/upload">
@@ -76,12 +76,15 @@ class NavMenu extends Component<Props, State> {
 				{/* </NavItem>
 						<NavItem> */}
 				<NavLink tag={Link} className="navmenu-navlink" to="/statsstuff">
-					Stats stuff
+					Stats Processing
 				</NavLink>
 				{/* </NavItem>
 						<NavItem> */}
 				<NavLink tag={Link} className="navmenu-navlink" to="/viewstats">
 					View Stats
+				</NavLink>
+				<NavLink tag={Link} className="navmenu-navlink" to="/standings">
+					Standings & Results
 				</NavLink>
 				{/* </NavItem> */}
 				{/* </ul> */}

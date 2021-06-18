@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community"
-import { nameof } from "../../utils/utils"
+import { CaseInsensitiveComparator, nameof } from "../../utils/utils"
 import { IndividualGamePlayerStats } from "../CumulativePlayerStats"
 
 const ViewStatsPerGameStatsTableColDefs: ColDef[] = [
@@ -7,6 +7,7 @@ const ViewStatsPerGameStatsTableColDefs: ColDef[] = [
 		headerName: "Name",
 		field: nameof<IndividualGamePlayerStats>("Name"),
 		pinned: true,
+		comparator: CaseInsensitiveComparator,
 	},
 	{ headerName: "RSCId", field: nameof<IndividualGamePlayerStats>("RSCId") },
 	{

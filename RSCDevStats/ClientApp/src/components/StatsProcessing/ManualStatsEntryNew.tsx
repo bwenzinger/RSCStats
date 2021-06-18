@@ -11,7 +11,7 @@ import ManualStatsEntryList from "./ManualStatsEntryList"
 import { AgGridColumn, AgGridReact } from "ag-grid-react"
 import { GridOptions } from "ag-grid-community"
 import ManualStatsEntryColDef from "../../models/ColDefs/ManualStatsEntryColDef"
-import BallchasingApi from "../../BallchasingApi"
+import BackendApi from "../../BackendApi"
 import PlayerSelectCellRenderer from "./cellRenderers/PlayerSelectCellRenderer"
 import { nameof } from "../../utils/utils"
 import PlayerWonCellRenderer from "./cellRenderers/CheckboxCellRenderer"
@@ -24,7 +24,7 @@ interface Props {
 	className?: string
 }
 
-const ballChasingApi = new BallchasingApi()
+const backendApi = new BackendApi()
 
 const playerTrackerIdsState = atom<PlayerTrackerId[] | undefined>({
 	key: "playerTrackerIds", // unique ID (with respect to other atoms/selectors)
@@ -244,9 +244,9 @@ const ManualStatsEntryNew = (props: Props) => {
 		})
 
 		if (playerStatsToUpload && playerStatsToUpload.length > 0) {
-			ballChasingApi.instance
+			backendApi.instance
 				.post<IndividualGamePlayerStats[]>(
-					`InsertWeeklyStats`,
+					`PlayerStats/InsertWeeklyStats`,
 					playerStatsToUpload
 				)
 				.then(function (response) {

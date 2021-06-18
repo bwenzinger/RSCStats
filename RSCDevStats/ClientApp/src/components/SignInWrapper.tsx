@@ -10,6 +10,9 @@ import ViewStats from "./ViewStats"
 import StatsProcessing from "./StatsProcessing/StatsProcessing"
 import { PlayerTrackerId } from "../models/PlayerTrackerId"
 import { atom, useRecoilState } from "recoil"
+import { PlayerContract } from "../models/PlayerContract"
+import { LeagueTeam } from "../models/LeagueTeam"
+import ViewStandings from "./ViewStandings"
 // import App from "./App"
 
 interface PassedProps {
@@ -26,6 +29,16 @@ const uniquePlayerNamesState = atom<string[] | undefined>({
 	default: undefined, // default value (aka initial value)
 })
 
+const playerContractsState = atom<PlayerContract[] | undefined>({
+	key: "playerContracts", // unique ID (with respect to other atoms/selectors)
+	default: undefined, // default value (aka initial value)
+})
+
+const leagueTeamsState = atom<LeagueTeam[] | undefined>({
+	key: "leagueTeams", // unique ID (with respect to other atoms/selectors)
+	default: undefined, // default value (aka initial value)
+})
+
 let done = false
 
 const CLIENT_ID =
@@ -37,6 +50,8 @@ const DISCOVERY_DOCS = [
 ]
 
 const trackerLinksSheetId = "1HLd_2yMGh_lX3adMLxQglWPIfRuiSiv587ABYnQX-0s"
+
+const playerContractsSheetId = "1WOQz4JWI3N2fhqAkwmmRKBm52_iKc7nax-Ad4nPwrvA"
 
 // Authorization scopes required by the API; multiple scopes can be
 // included, separated by spaces.
@@ -85,11 +100,59 @@ const SignInWrapper = (props: PassedProps) => {
 		uniquePlayerNamesState
 	)
 
+	const [playerContracts, setPlayerContracts] =
+		useRecoilState(playerContractsState)
+
+	const [leagueTeams, setLeagueTeams] = useRecoilState(leagueTeamsState)
+
 	useEffect(() => {
 		gapi.load("client:auth2", () => initClient())
 
 		setInitiatedClient(true)
 	}, [])
+
+	useEffect(() => {
+		if (playerTrackerIds && playerTrackerIds?.length > 0) {
+			const client = gapi.client as any
+
+			client.sheets.spreadsheets.values
+				.get({
+					spreadsheetId: playerContractsSheetId,
+					range: "Contracts",
+				})
+				.then(
+					function (response: any) {
+						const tempPlayerContracts: PlayerContract[] = []
+						response.result.values.forEach((element: any, index: number) => {
+							if (index !== 0) {
+								const foundPlayerTracker = playerTrackerIds.find(
+									(x) => x.Name === element[0]
+								)
+								if (foundPlayerTracker) {
+									tempPlayerContracts.push({
+										RSCId: foundPlayerTracker.RSCId,
+										OnlineId: foundPlayerTracker.platformId,
+										OnlinePlatform: foundPlayerTracker.platform,
+										Name: element[0],
+										Franchise: element[1],
+										Team: element[2],
+										BaseMmr: element[3],
+										CurrentMmr: element[4],
+										ContractStatus: element[5],
+										ContractLength: element[6],
+									})
+								}
+							}
+						})
+
+						setPlayerContracts(tempPlayerContracts)
+					},
+					function (error: any) {
+						console.log("Error: " + error.result.error.message)
+					}
+				)
+		}
+	}, [playerTrackerIds, setPlayerContracts])
 
 	return (
 		<div className={props.className + " App"}>
@@ -98,10 +161,11 @@ const SignInWrapper = (props: PassedProps) => {
 			)}
 			{isSignedIntoGapi && (
 				<Layout>
-					<Route exact path="/" component={Home} />
+					<Route exact path="/" component={ViewStats} />
 					<Route path="/upload" component={ReplayUpload} />
 					<Route path="/statsstuff" component={StatsProcessing} />
 					<Route path="/viewstats" component={ViewStats} />
+					<Route path="/standings" component={ViewStandings} />
 					{/* <Route path="/fetch-data" component={FetchData} /> */}
 				</Layout>
 			)}
@@ -118,6 +182,31 @@ const SignInWrapper = (props: PassedProps) => {
 				setIsSignedIntoGapi(true)
 				// useEffect(() => {
 				const client = gapi.client as any
+
+				client.sheets.spreadsheets.values
+					.get({
+						spreadsheetId: playerContractsSheetId,
+						range: "Teams",
+					})
+					.then(
+						function (response: any) {
+							const tempLeagueTeams: LeagueTeam[] = []
+							response.result.values.forEach((element: any, index: number) => {
+								if (index !== 0) {
+									tempLeagueTeams.push({
+										TeamName: element[0],
+										Franchise: element[1],
+										Tier: element[2],
+									})
+								}
+							})
+
+							setLeagueTeams(tempLeagueTeams)
+						},
+						function (error: any) {
+							console.log("Error: " + error.result.error.message)
+						}
+					)
 
 				client.sheets.spreadsheets.values
 					.get({
@@ -216,6 +305,7 @@ const SignInWrapper = (props: PassedProps) => {
 							console.log("Error: " + error.result.error.message)
 						}
 					)
+
 				// }, [])
 			})
 			.catch(function (error: any) {
