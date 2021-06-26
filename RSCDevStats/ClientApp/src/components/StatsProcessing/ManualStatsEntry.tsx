@@ -1,27 +1,26 @@
 import React from "react"
 import styled from "styled-components"
-import { Autocomplete } from "@material-ui/lab"
-import { Fab, TextField } from "@material-ui/core"
-import { PlayerTrackerId } from "../../models/PlayerTrackerId"
-import { atom, useRecoilState } from "recoil"
-import { Add, Save } from "@material-ui/icons"
+import { useRecoilState } from "recoil"
 import { ManualPlayerStatsEntry } from "../../models/ManualPlayerStatsEntry"
-import { v4 as uuidv4 } from "uuid"
 import { Modal, ModalBody, ModalFooter, Button } from "reactstrap"
 import { IndividualGamePlayerStats } from "../../models/CumulativePlayerStats"
-import ManualStatsEntryList from "./ManualStatsEntryList"
+import { GridOptions } from "ag-grid-community"
+import ManualStatsEntryColDef from "../../models/ColDefs/ManualStatsEntryColDef"
 import BackendApi from "../../BackendApi"
+import PlayerSelectCellRenderer from "./cellRenderers/PlayerSelectCellRenderer"
+import { nameof } from "../../utils/utils"
+import CheckboxCellRenderer from "./cellRenderers/CheckboxCellRenderer"
+import { Autocomplete } from "@material-ui/lab"
+import { TextField } from "@material-ui/core"
+import { AgGridReact } from "ag-grid-react"
+import { PlayerDetails } from "../../models/PlayerDetails"
+import { PlayerDetailsState } from "../../recoil/RscImportAtom"
 
 interface Props {
 	className?: string
 }
 
 const backendApi = new BackendApi()
-
-const playerTrackerIdsState = atom<PlayerTrackerId[] | undefined>({
-	key: "playerTrackerIds", // unique ID (with respect to other atoms/selectors)
-	default: undefined, // default value (aka initial value)
-})
 
 const leagues = [
 	"Premier",
@@ -35,53 +34,94 @@ const leagues = [
 	"Amateur",
 ]
 
+// const initTestData: ManualPlayerStatsEntry[] = [
+// 	{
+// 		id: uuidv4(),
+// 		Player: "bob",
+// 	},
+// ]
+
+// const frameworkComponents = {
+// 	playerSelectCellRenderer: PlayerSelectCellRenderer,
+// }
+
 const ManualStatsEntry = (props: Props) => {
-	// const [entries, setEntries] = React.useState<ManualEntry[]>([
-	// 	{ Player: "test", Score: 1, Goals: 2 },
-	// 	{ Player: "test", Score: 1, Goals: 2 },
-	// ])
-	// const [playerStatIds, setPlayerStatIds] = React.useState<string[]>([])
+	// const [playerTrackerIds] = useRecoilState<PlayerTrackerId[] | undefined>(
+	// 	PlayerTrackerIdsState
+	// )
+	const [playerDetails] = useRecoilState<PlayerDetails[] | undefined>(
+		PlayerDetailsState
+	)
 
-	// const playerStats = React.useRef<ManualPlayerStatsEntry[]>([])
-	const [entries, setEntries] = React.useState<ManualPlayerStatsEntry[]>([])
-	const [selectedLeague, setSelectedLeague] =
-		React.useState<string | null>(null)
-
-	const [selectedPlayer, setSelectedPlayer] =
-		React.useState<PlayerTrackerId | null>(null)
+	const [selectedLeague, setSelectedLeague] = React.useState<string | null>(
+		null
+	)
 
 	const [showUploadingModal, setShowUploadingModal] =
 		React.useState<boolean>(false)
 
 	const [isUploading, setIsUploading] = React.useState<boolean>(false)
 
-	const [playerTrackerIds] = useRecoilState(playerTrackerIdsState)
+	const [gridOptions] = React.useState<GridOptions>({
+		// rowSelection: "multiple",
+		// frameworkComponents: { frameworkComponents },
+		defaultColDef: {
+			editable: true,
+			resizable: true,
+			// sortable: true,
+		},
+	})
+
+	React.useEffect(() => {
+		function setSelectedCellValueAsPasteValue(event: any) {
+			// var clipboardData = event.clipboardData || window.clipboardData
+
+			var clipboardData = event.clipboardData
+			var pastedData = clipboardData.getData("Text")
+
+			const focusedCell = gridOptions.api?.getFocusedCell()
+			if (focusedCell) {
+				const rowNodeToUpdate = gridOptions.api?.getDisplayedRowAtIndex(
+					focusedCell!!.rowIndex
+				)
+				if (rowNodeToUpdate) {
+					if (
+						focusedCell.column.getColDef().field ===
+						nameof<ManualPlayerStatsEntry>("Player")
+					) {
+						const foundPlayer = playerDetails?.find(
+							(x) => x.Name === pastedData
+						)
+						if (foundPlayer) {
+							rowNodeToUpdate.setDataValue(focusedCell.column, foundPlayer)
+						}
+					} else {
+						rowNodeToUpdate.setDataValue(focusedCell.column, pastedData)
+					}
+
+					// gridOptions.api?.refreshCells({
+					// 	rowNodes: [rowNodeToUpdate],
+					// })
+					gridOptions.api?.redrawRows({
+						rowNodes: [rowNodeToUpdate],
+					})
+				}
+			}
+		}
+
+		window.addEventListener("paste", setSelectedCellValueAsPasteValue)
+
+		return () =>
+			window.removeEventListener("paste", setSelectedCellValueAsPasteValue)
+	}, [gridOptions.api, playerDetails])
 
 	return (
-		<div className={props.className + " manual-stats-entry"}>
-			{/* <div className="manual-stats-entry-content"> */}
-			<Autocomplete
-				className="manual-stats-entry-autocomplete"
-				loading={playerTrackerIds === undefined}
-				options={
-					playerTrackerIds?.filter(
-						(element, index, array) =>
-							array.findIndex((x) => x.RSCId === element.RSCId) === index
-					) ?? []
-				}
-				getOptionLabel={(option) => {
-					return option.Name
-				}}
-				renderInput={(params) => (
-					<TextField
-						{...params}
-						variant="outlined"
-						label="Select Player"
-						// placeholder="Favorites"
-					/>
-				)}
-				onChange={onPlayerChange}
-			/>
+		<div
+			className={
+				props.className +
+				" ag-theme-material manual-stats-entry material-drop-shadow"
+			}
+		>
 			<Autocomplete
 				className="manual-stats-entry-autocomplete"
 				options={leagues}
@@ -99,62 +139,44 @@ const ManualStatsEntry = (props: Props) => {
 				)}
 				onChange={onLeagueChange}
 			/>
-			<ManualStatsEntryList
-				entries={entries}
-				onValueChange={onValueChange}
-				onDeleteClick={onDeleteClick}
-			/>
-			{/* {entries.map((entry) => (
-				<ManualStatsEntryItem
-					playerStats={entry}
-					onValueChange={(id: string, field: string, newValue: number) => {
-						// playerStats.current[id][field] = newValue
-						// const playerStat = playerStats.current.find((x) => x.id === id)
-						// if (playerStat) {
-						// 	playerStat[field] = newValue
-						// }
-						const updatedEntries = produce(entries, (draftState) => {
-							let entry = draftState.find((x) => x.id === id)
-							if (entry) {
-								entry[field] = newValue
-							}
-						})
-						setEntries(updatedEntries)
-					}}
-					onDeleteClick={(id: string) => {
-						setEntries(entries.filter((x) => x.id !== id))
-						// setPlayerStatIds([...playerStatIds.filter((x) => x !== id)])
-						// playerStats.current = playerStats.current.filter((x) => x.id !== id)
+			<Button
+				className="headerButton action-button-color material-drop-shadow"
+				onClick={() => {
+					var newItems = [{}]
+					var res = gridOptions.api?.applyTransaction({
+						add: newItems,
+						addIndex: 0,
+					})
+				}}
+			>
+				Add Row
+			</Button>
+			<Button
+				className="headerButton action-button-color material-drop-shadow"
+				onClick={() => {
+					gridOptions.api?.forEachNode((x) => {
+						console.log(x.data)
+					})
+				}}
+			>
+				Log data
+			</Button>
+			{selectedLeague && (
+				<AgGridReact
+					gridOptions={gridOptions}
+					columnDefs={ManualStatsEntryColDef}
+					rowData={[{}, {}, {}, {}, {}, {}]}
+					frameworkComponents={{
+						playerSelectCellRenderer: PlayerSelectCellRenderer,
+						checkboxCellRenderer: CheckboxCellRenderer,
 					}}
 				/>
-			))} */}
-			{/* </div> */}
-			{selectedPlayer && selectedLeague && (
-				<div className="manual-stats-entry-floating-actionbutton">
-					<Fab
-						className="manual-stats-entry-fab"
-						color="primary"
-						aria-label="add"
-						onClick={() => {
-							setEntries([...entries, { id: uuidv4() }])
-							// playerStats.current.push({
-							// 	id: id,
-							// })
-							// setPlayerStatIds([...playerStatIds, id])
-						}}
-					>
-						<Add />
-					</Fab>
-					<Fab
-						className="manual-stats-entry-fab"
-						color="primary"
-						aria-label="add"
-						onClick={() => {
-							uploadManualStats()
-						}}
-					>
-						<Save />
-					</Fab>
+			)}
+			{selectedLeague && (
+				<div className="footerBox">
+					<Button color="success" onClick={uploadManualStats}>
+						Upload Stats
+					</Button>
 				</div>
 			)}
 			<Modal isOpen={showUploadingModal}>
@@ -172,46 +194,8 @@ const ManualStatsEntry = (props: Props) => {
 		</div>
 	)
 
-	function onPlayerChange(
-		event: object,
-		value: PlayerTrackerId | null,
-		reason: string
-	) {
-		setSelectedPlayer(value)
-		// if (value === null) {
-		// 	setEntries([])
-		// } else {
-		// 	setEntries([
-		// 		{ id: uuidv4() },
-		// 		{ id: uuidv4() },
-		// 		{ id: uuidv4() },
-		// 		{ id: uuidv4() },
-		// 	])
-		// }
-	}
-
 	function onLeagueChange(event: object, value: string | null, reason: string) {
 		setSelectedLeague(value)
-	}
-
-	function onValueChange(id: string, field: string, newValue: number) {
-		// const updatedEntries = produce(entries, (draftState) => {
-		// 	let entry = draftState.find((x) => x.id === id)
-		// 	if (entry) {
-		// 		entry[field] = newValue
-		// 	}
-		// })
-		// setEntries(updatedEntries)
-		let entry = entries.find((x) => x.id === id)
-		if (entry) {
-			entry[field] = newValue //yes this isn't using setState, but its intentional for performance reasons
-		}
-	}
-
-	function onDeleteClick(id: string) {
-		setEntries(entries.filter((x) => x.id !== id))
-		// setPlayerStatIds([...playerStatIds.filter((x) => x !== id)])
-		// playerStats.current = playerStats.current.filter((x) => x.id !== id)
 	}
 
 	function uploadManualStats() {
@@ -219,87 +203,87 @@ const ManualStatsEntry = (props: Props) => {
 		setIsUploading(true)
 		let playerStatsToUpload: IndividualGamePlayerStats[] = []
 
-		entries.forEach((entry) => {
-			playerStatsToUpload.push({
-				Name: entry.Player!!,
-				RSCId: selectedPlayer!!.RSCId,
-				OnlineId: "",
-				ReplayId: "",
-				ReplayTitle: "",
-				Week: -1,
-				Tier: selectedLeague!!,
-				Team: "",
-				OponentTeam: "",
-				Score: entry.Score,
-				Goals: entry.Goals,
-				Assists: entry.Assists,
-				Saves: entry.Saves,
-				Shots: entry.Shots,
-				Cycle:
-					entry.Goals!! > 0 &&
-					entry.Assists!! > 0 &&
-					entry.Shots!! > 0 &&
-					entry.Saves!! > 0,
-			})
+		gridOptions.api?.forEachNode((node) => {
+			let nodeData = node.data as ManualPlayerStatsEntry
+
+			if (nodeData.Player) {
+				let foundPlayer = playerDetails?.find((x) => x.Name === nodeData.Player)
+
+				playerStatsToUpload.push({
+					Name: nodeData.Player ?? "",
+					RSCId: foundPlayer?.RSCId ?? "",
+					OnlineId: "",
+					ReplayId: "",
+					ReplayTitle: "",
+					GameNumber: -1,
+					Tier: selectedLeague!!,
+					Team: "",
+					OponentTeam: "",
+					GamesWon: nodeData.Won ? 1 : 0,
+					GamesLost: nodeData.Won ? 0 : 1,
+					MVP: nodeData.MVP,
+					Score: nodeData.Score,
+					Goals: nodeData.Goals,
+					Assists: nodeData.Assists,
+					Saves: nodeData.Saves,
+					Shots: nodeData.Shots,
+					Cycle: Math.min(
+						nodeData.Goals ?? 0,
+						nodeData.Assists ?? 0,
+						nodeData.Shots ?? 0,
+						nodeData.Saves ?? 0
+					),
+				})
+			}
 		})
 
-		backendApi.instance
-			.post<IndividualGamePlayerStats[]>(
-				`PlayerStats/InsertWeeklyStats`,
-				playerStatsToUpload
-			)
-			.then(function (response) {
-				// handle success
-				setIsUploading(false)
-			})
-			.catch(function (error) {
-				// handle error
-				console.log(error)
-			})
-			.then(function () {
-				// always executed
-			})
+		if (playerStatsToUpload && playerStatsToUpload.length > 0) {
+			backendApi.instance
+				.post<IndividualGamePlayerStats[]>(
+					`PlayerStats/InsertWeeklyStats`,
+					playerStatsToUpload
+				)
+				.then(function (response) {
+					// handle success
+					setIsUploading(false)
+				})
+				.catch(function (error) {
+					// handle error
+					console.log(error)
+				})
+				.then(function () {
+					// always executed
+				})
+		} else {
+			setIsUploading(false)
+		}
 	}
 }
 
 export default styled(ManualStatsEntry)`
 	margin: 25px;
 	margin-right: 100px;
-	height: calc(100% - 50px);
 	display: flex;
 	flex-direction: column;
-	/* width: 100%; */
-	overflow-y: auto;
-	/* background-color: orange; */
-	min-width: 300px;
-	padding-top: 10px;
+	width: 1400px;
+	padding: 20px;
+	background-color: #2a3045;
+	border-radius: 5px;
+	height: 650px;
 
-	/* .manual-stats-entry-content {
-		height: calc(100% - 50px);
-		width: 100%;
+	.headerButton {
+		width: 300px;
+		margin-top: 15px;
+	}
+
+	.footerBox {
+		padding: 15px;
+		flex: 0;
+		height: 70px;
 		display: flex;
-		flex-direction: column;
-	} */
-
-	.manual-stats-entry-floating-actionbutton {
-		/* height: calc(100% - 50px);
-		width: 100%; */
-		position: fixed;
-		bottom: 0;
-		right: 0;
-		width: 200px;
-		height: 100px;
-	}
-
-	.manual-stats-entry-autocomplete {
-		margin-bottom: 20px;
-		background-color: #2a3045;
-		border-radius: 10px;
-	}
-
-	.manual-stats-entry-fab {
-		height: 60px;
-		width: 60px;
-		margin-right: 10px;
+		justify-content: flex-end;
 	}
 `
+function PlayerTrackerIdsState<T>(PlayerTrackerIdsState: any): [any] {
+	throw new Error("Function not implemented.")
+}

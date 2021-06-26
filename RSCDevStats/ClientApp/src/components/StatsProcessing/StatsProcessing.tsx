@@ -1,7 +1,6 @@
 import React from "react"
 import styled from "styled-components"
 import ManualStatsEntry from "./ManualStatsEntry"
-import ManualStatsEntryNew from "./ManualStatsEntryNew"
 import StatsCongregate from "./StatsCongregate"
 // import { IconButton } from "@material-ui/core"
 // import NavigateNextIcon from "@material-ui/icons/NavigateNext"
@@ -44,7 +43,7 @@ const StatsProcessing = (props: PassedProps) => {
 					<StatsCongregate />
 				</div>
 			)}
-			{selectedTab === ManualTab && <ManualStatsEntryNew />}
+			{selectedTab === ManualTab && <ManualStatsEntry />}
 		</div>
 	)
 }

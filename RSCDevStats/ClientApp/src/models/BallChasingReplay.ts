@@ -15,7 +15,7 @@ export interface BallChasingReplay {
 	overtime?: boolean
 	season?: number
 	season_type?: string
-	date?: string
+	// date?: string
 	date_has_timezone?: boolean
 	visibility?: string
 	groups?: BallChasingReplayGroupsEntity[] | null

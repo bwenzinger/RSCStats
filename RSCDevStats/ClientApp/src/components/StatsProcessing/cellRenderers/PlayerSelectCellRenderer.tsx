@@ -1,27 +1,19 @@
 import React, { Component } from "react"
 import styled from "styled-components"
 import { atom, useRecoilState } from "recoil"
-import { PlayerTrackerId } from "../../../models/PlayerTrackerId"
 import { Autocomplete } from "@material-ui/lab"
 import { TextField, withStyles } from "@material-ui/core"
 import { ICellRendererParams } from "ag-grid-community"
+import { PlayerDetails } from "../../../models/PlayerDetails"
+import { PlayerDetailsState } from "../../../recoil/RscImportAtom"
+// import { UniquePlayerNamesState } from "../../../recoil/RscImportAtom"
 
 interface PassedProps {
 	className?: string
-	value: PlayerTrackerId
+	value: PlayerDetails
 }
 
 type Props = PassedProps & ICellRendererParams
-
-// const playerTrackerIdsState = atom<PlayerTrackerId[] | undefined>({
-// 	key: "playerTrackerIds", // unique ID (with respect to other atoms/selectors)
-// 	default: undefined, // default value (aka initial value)
-// })
-
-const uniquePlayerNamesState = atom<string[] | undefined>({
-	key: "uniquePlayerNames", // unique ID (with respect to other atoms/selectors)
-	default: undefined, // default value (aka initial value)
-})
 
 // const customStyle = {
 // 	root: {
@@ -40,13 +32,9 @@ const renderInput = (params) => (
 )
 
 export default (props: Props) => {
-	// const [playerTrackerIds] = useRecoilState<PlayerTrackerId[] | undefined>(
-	// 	playerTrackerIdsState
-	// )
+	const [playerDetails] = useRecoilState(PlayerDetailsState)
 
-	const [uniquePlayerNames] = useRecoilState(uniquePlayerNamesState)
-
-	const [playerValue] = React.useState<PlayerTrackerId>(props.value)
+	const [playerValue] = React.useState<PlayerDetails>(props.value)
 
 	return (
 		<div style={{ paddingTop: "5px" }}>
@@ -54,19 +42,19 @@ export default (props: Props) => {
 				fullWidth={true}
 				size="small"
 				className="manual-stats-entry-autocomplete"
-				loading={uniquePlayerNames === undefined}
-				options={uniquePlayerNames ?? []}
-				value={playerValue?.Name}
+				loading={playerDetails === undefined}
+				options={playerDetails ?? []}
+				value={playerValue}
 				// getOptionLabel={getOptionLabel}
 				renderInput={renderInput}
-				onChange={onPlayerChange}
+				// onChange={onPlayerChange}
 			/>
 		</div>
 	)
 
-	function onPlayerChange(event: object, value: string | null, reason: string) {
-		if (props.setValue) {
-			props.setValue(value)
-		}
-	}
+	// function onPlayerChange(event: object, value: string | null, reason: string) {
+	// 	if (props.setValue) {
+	// 		props.setValue(value)
+	// 	}
+	// }
 }

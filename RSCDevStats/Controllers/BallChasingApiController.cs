@@ -53,7 +53,7 @@ namespace RSCWebApi.Controllers
 
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
             {
-                Console.WriteLine("another 429, GetGroupsByCreator, creator: " + creator);
+                Console.WriteLine("Too many ballchasing requests (429), GetGroupsByCreator, creator: " + creator);
             }
 
             return response.Data.list;
@@ -77,7 +77,7 @@ namespace RSCWebApi.Controllers
 
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
             {
-                Console.WriteLine("another 429, GetGroupsByParentGroup, groupId: " + groupId);
+                Console.WriteLine("Too many ballchasing requests (429), GetGroupsByParentGroup, groupId: " + groupId);
             }
 
             return response.Data.list;
@@ -99,7 +99,7 @@ namespace RSCWebApi.Controllers
 
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
             {
-                Console.WriteLine("another 429, GetGroupById, groupId: " + groupId);
+                Console.WriteLine("Too many ballchasing requests (429), GetGroupById, groupId: " + groupId);
             }
 
             return response.Data;
@@ -121,7 +121,7 @@ namespace RSCWebApi.Controllers
 
             if(response.StatusCode == HttpStatusCode.TooManyRequests)
             {
-                Console.WriteLine("another 429, GetReplaysByGroup, groupId: " + groupId);
+                Console.WriteLine("Too many ballchasing requests (429), GetReplaysByGroup, groupId: " + groupId);
             }
 
             return response.Data;
@@ -142,7 +142,7 @@ namespace RSCWebApi.Controllers
 
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
             {
-                Console.WriteLine("another 429, GetReplayById, replayId: " + replayId);
+                Console.WriteLine("Too many ballchasing requests (429), GetReplayById, replayId: " + replayId);
             }
 
             return response.Data;

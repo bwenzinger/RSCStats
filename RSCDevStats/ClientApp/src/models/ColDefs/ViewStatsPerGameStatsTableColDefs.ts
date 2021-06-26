@@ -11,8 +11,8 @@ const ViewStatsPerGameStatsTableColDefs: ColDef[] = [
 	},
 	{ headerName: "RSCId", field: nameof<IndividualGamePlayerStats>("RSCId") },
 	{
-		headerName: "Week",
-		field: nameof<IndividualGamePlayerStats>("Week"),
+		headerName: "GameNumber",
+		field: nameof<IndividualGamePlayerStats>("GameNumber"),
 	},
 	{
 		headerName: "Tier",

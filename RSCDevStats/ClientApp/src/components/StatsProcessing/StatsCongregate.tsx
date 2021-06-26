@@ -7,8 +7,6 @@ import {
 	BallChasingGroupStats,
 	TeamsEntity,
 } from "../../models/BallChasingApiModels"
-import { PlayerTrackerId } from "../../models/PlayerTrackerId"
-import { gapi } from "gapi-script"
 import {
 	CumulativePlayerStats,
 	IndividualGamePlayerStats,
@@ -24,11 +22,14 @@ import { GridOptions } from "ag-grid-community"
 import { Button, Modal, ModalBody, ModalFooter } from "reactstrap"
 import WeeklyCumulativeStatsTableColDefs from "../../models/ColDefs/WeeklyCumulativeStatsTableColDefs"
 import WeeklyPerGameStatsTableColDefs from "../../models/ColDefs/WeeklyPerGameStatsTableColDefs"
-import { atom, useRecoilState } from "recoil"
-import { PlayerContract } from "../../models/PlayerContract"
-import { LeagueTeam } from "../../models/LeagueTeam"
+import { useRecoilState } from "recoil"
 import { MatchResult } from "../../models/MatchResult"
 import MatchResultsTableColDefs from "../../models/ColDefs/MatchResultsTableColDefs"
+import {
+	LeagueTeamsState,
+	PlayerDetailsState,
+} from "../../recoil/RscImportAtom"
+import { PlayerDetails } from "../../models/PlayerDetails"
 // import { Schedule } from "./models/Scheduling"
 
 interface PassedProps {
@@ -38,20 +39,20 @@ interface PassedProps {
 	isDragActive?: boolean
 }
 
-const playerTrackerIdsState = atom<PlayerTrackerId[] | undefined>({
-	key: "playerTrackerIds", // unique ID (with respect to other atoms/selectors)
-	default: undefined, // default value (aka initial value)
-})
+// const playerTrackerIdsState = atom<PlayerTrackerId[] | undefined>({
+// 	key: "playerTrackerIds", // unique ID (with respect to other atoms/selectors)
+// 	default: undefined, // default value (aka initial value)
+// })
 
-const playerContractsState = atom<PlayerContract[] | undefined>({
-	key: "playerContracts", // unique ID (with respect to other atoms/selectors)
-	default: undefined, // default value (aka initial value)
-})
+// const playerContractsState = atom<PlayerContract[] | undefined>({
+// 	key: "playerContracts", // unique ID (with respect to other atoms/selectors)
+// 	default: undefined, // default value (aka initial value)
+// })
 
-const leagueTeamsState = atom<LeagueTeam[] | undefined>({
-	key: "leagueTeams", // unique ID (with respect to other atoms/selectors)
-	default: undefined, // default value (aka initial value)
-})
+// const leagueTeamsState = atom<LeagueTeam[] | undefined>({
+// 	key: "leagueTeams", // unique ID (with respect to other atoms/selectors)
+// 	default: undefined, // default value (aka initial value)
+// })
 
 // const rawStatsGoogleSheet = "1y4abHsJrmkdQAGGNW7ZAVpnrL3lZVN5Eh4bnsxWfHlo"
 
@@ -64,14 +65,14 @@ const StatsCongregate = (props: PassedProps) => {
 	// const [playerTrackerIds, setPlayerTrackerIds] =
 	// 	React.useState<PlayerTrackerId[]>()
 
-	const [playerTrackerIds] = useRecoilState<PlayerTrackerId[] | undefined>(
-		playerTrackerIdsState
+	const [playerDetails] = useRecoilState<PlayerDetails[] | undefined>(
+		PlayerDetailsState
 	)
 
-	const [playerContracts, setPlayerContracts] =
-		useRecoilState(playerContractsState)
+	// const [playerContracts, setPlayerContracts] =
+	// 	useRecoilState(PlayerContractsState)
 
-	const [leagueTeams, setLeagueTeams] = useRecoilState(leagueTeamsState)
+	const [leagueTeams] = useRecoilState(LeagueTeamsState)
 
 	const [ballChasingSeasonGroups, setBallChasingSeasonGroups] =
 		React.useState<BallChasingGroup[]>()
@@ -90,7 +91,7 @@ const StatsCongregate = (props: PassedProps) => {
 	const [ballChasingTeamGroups, setBallChasingTeamGroups] =
 		React.useState<BallChasingGroup[]>()
 	const [showCumulativeStats, setShowCumulativeStats] =
-		React.useState<boolean>(true)
+		React.useState<boolean>(false)
 
 	const [showSelectDayGroups, setShowSelectDayGroups] =
 		React.useState<boolean>(false)
@@ -99,7 +100,7 @@ const StatsCongregate = (props: PassedProps) => {
 	const [showUploadingModal, setShowUploadingModal] =
 		React.useState<boolean>(false)
 
-	const [showMatchResults, setShowMatchResults] = React.useState<boolean>(true)
+	const [showMatchResults, setShowMatchResults] = React.useState<boolean>(false)
 
 	const [matchResults, setMatchResults] = React.useState<MatchResult[]>([])
 
@@ -172,11 +173,11 @@ const StatsCongregate = (props: PassedProps) => {
 
 	React.useEffect(() => {
 		if (showCumulativeStats) {
-			gridOptions.api?.setRowData(perGamePlayerStats)
-			gridOptions.api?.setColumnDefs(WeeklyPerGameStatsTableColDefs)
-		} else {
 			gridOptions.api?.setRowData(cumulativePlayerStats)
 			gridOptions.api?.setColumnDefs(WeeklyCumulativeStatsTableColDefs)
+		} else {
+			gridOptions.api?.setRowData(perGamePlayerStats)
+			gridOptions.api?.setColumnDefs(WeeklyPerGameStatsTableColDefs)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [showCumulativeStats])
@@ -188,7 +189,9 @@ const StatsCongregate = (props: PassedProps) => {
 					test stats upload
 				</button> */}
 				{selectedSeasonGroup && <div>Selected: {selectedSeasonGroup.name}</div>}
-				{!selectedSeasonGroup && <div>Please select a season</div>}
+				{playerDetails && playerDetails.length > 0 && !selectedSeasonGroup && (
+					<div>Please select a season</div>
+				)}
 				{!selectedSeasonGroup && ballChasingSeasonGroups && (
 					<div>
 						{ballChasingSeasonGroups.map((element) => (
@@ -432,7 +435,39 @@ const StatsCongregate = (props: PassedProps) => {
 	}
 
 	function exportToExcel() {
-		gridOptions?.api?.exportDataAsCsv()
+		const fieldsToExport = gridOptions?.columnApi
+			?.getAllColumns()
+			?.filter((x) => x.getColDef().checkboxSelection !== true)
+			.map((x) => x.getColDef().field ?? "") // exclude the checkbox column
+
+		gridOptions?.api?.exportDataAsCsv({ columnKeys: fieldsToExport })
+		// gridOptions?.api?.exportDataAsCsv({
+		// 	columnKeys: [
+		// 		"Name",
+		// 		"RSCId",
+		// 		"OnlineId",
+		// 		"ReplayId",
+		// 		"Replay Title",
+		// 		"Tier",
+		// 		"Team",
+		// 		"Oponent Team",
+		// 		"Wins",
+		// 		"Losses",
+		// 		"Score",
+		// 		"Goals",
+		// 		"Assists",
+		// 		"Saves",
+		// 		"Shots",
+		// 		"MVP",
+		// 		"Cycle",
+		// 		"Hat Tricks",
+		// 		"Playmakers",
+		// 		"Saviors",
+		// 		"GoalsAgainst",
+		// 		"ShotsAgainst",
+		// 		"bpm",
+		// 	],
+		// })
 	}
 
 	function onSeasonGroupClick(group: BallChasingGroup) {
@@ -554,12 +589,33 @@ const StatsCongregate = (props: PassedProps) => {
 								const team2: TeamsEntity = teams[1]
 								if (team1 && team2 && team1.players && team2.players) {
 									const mappedTeam1Players = team1.players.map((x) => x.id)
-									const team1Players = playerContracts?.filter(
-										(x) => mappedTeam1Players.includes(x.OnlineId) && x.Team
+									// const team1Players = playerDetails?.filter(
+									// 	//TODO MIGHT NEED TO FIX THIS
+									// 	(x) =>
+									// 		mappedTeam1Players.some(
+									// 			(y) =>
+									// 				// y.includes(
+									// 				x.PlayerTrackerLinks.map((z) => z.PlatformId) ?? []
+									// 			// )
+									// 		) && x.Team
+									// )
+									const team1Players = playerDetails?.filter(
+										//TODO MIGHT NEED TO FIX THIS
+										(x) =>
+											x.PlayerTrackerLinks.some((y) =>
+												mappedTeam1Players.includes(y.PlatformId)
+											) && x.Team
 									)
 									const mappedTeam2Players = team2.players.map((x) => x.id)
-									const team2Players = playerContracts?.filter(
-										(x) => mappedTeam2Players.includes(x.OnlineId) && x.Team
+									// const team2Players = playerContracts?.filter(
+									// 	(x) => mappedTeam2Players.includes(x.OnlineId) && x.Team
+									// )
+									const team2Players = playerDetails?.filter(
+										//TODO MIGHT NEED TO FIX THIS
+										(x) =>
+											x.PlayerTrackerLinks.some((y) =>
+												mappedTeam2Players.includes(y.PlatformId)
+											) && x.Team
 									)
 									if (team1Players && team2Players) {
 										const team1LeagueTeam = leagueTeams!.find(
@@ -608,19 +664,36 @@ const StatsCongregate = (props: PassedProps) => {
 												) {
 													getDayGroupByIdResponse.data.players?.forEach(
 														(groupPlayerBeingProcessed) => {
-															let foundPlayer = playerTrackerIds?.find(
+															// let foundPlayer = playerTrackerIds?.find(
+															// 	(x) =>
+															// 		x.PlatformId?.toUpperCase() ===
+															// 		groupPlayerBeingProcessed.id?.toUpperCase()
+															// )
+															let foundPlayer = playerDetails?.find(
 																(x) =>
-																	x.platformId?.toUpperCase() ===
-																	groupPlayerBeingProcessed.id?.toUpperCase()
+																	x.PlayerTrackerLinks.some(
+																		(y) =>
+																			y.PlatformId.toUpperCase() ===
+																			groupPlayerBeingProcessed.id?.toUpperCase()
+																	)
+																// x.PlatformId?.toUpperCase() ===
+																// groupPlayerBeingProcessed.id?.toUpperCase()
 															)
 															if (
 																!foundPlayer &&
 																groupPlayerBeingProcessed.platform === "Epic"
 															) {
-																foundPlayer = playerTrackerIds?.find(
-																	(x) =>
-																		x.platformId?.toUpperCase() ===
-																		groupPlayerBeingProcessed.name?.toUpperCase()
+																// foundPlayer = playerTrackerIds?.find(
+																// 	(x) =>
+																// 		x.PlatformId?.toUpperCase() ===
+																// 		groupPlayerBeingProcessed.name?.toUpperCase()
+																// )
+																foundPlayer = playerDetails?.find((x) =>
+																	x.PlayerTrackerLinks.some(
+																		(y) =>
+																			y.PlatformId.toUpperCase() ===
+																			groupPlayerBeingProcessed.name?.toUpperCase()
+																	)
 																)
 															}
 															let playerStatsFromReplays: ReplayPlayerStats[] =
@@ -697,12 +770,18 @@ const StatsCongregate = (props: PassedProps) => {
 																		// 	? groupReplayData.orange.players?.forEach(tempPlayer => assistsAgainst += tempPlayer.)
 
 																		tempPlayerStatsByGame.push({
+																			Dummy1: "",
+																			Dummy2: "",
+																			Map: replay.map_name,
+																			Date: "",
+																			CarId: tempPlayerStats.car_id,
+																			CarName: tempPlayerStats.car_name,
 																			Name: groupPlayerBeingProcessed.name,
 																			RSCId: foundPlayer?.RSCId,
 																			OnlineId: groupPlayerBeingProcessed.id,
 																			ReplayId: replay.id!!,
 																			ReplayTitle: replay.title ?? "",
-																			Week: groupInt,
+																			GameNumber: groupInt,
 																			Tier: selectedLeagueGroup?.name ?? "",
 																			Team: groupPlayerBeingProcessed.team, //TODO THIS SHOULD COME FROM RSC SOMEWHERE
 																			OponentTeam:
@@ -718,15 +797,23 @@ const StatsCongregate = (props: PassedProps) => {
 																				tempPlayerStats.stats.core.assists,
 																			Saves: tempPlayerStats.stats.core.saves,
 																			Shots: tempPlayerStats.stats.core.shots,
+																			ShootingPercent:
+																				tempPlayerStats.stats.core
+																					.shooting_percentage,
 																			MVP:
 																				playerWonGame &&
 																				tempPlayerStats.stats.core.mvp,
-																			Cycle:
-																				tempPlayerStats.stats.core.goals > 0 &&
-																				tempPlayerStats.stats.core.assists >
-																					0 &&
-																				tempPlayerStats.stats.core.saves > 0 &&
-																				tempPlayerStats.stats.core.shots > 0,
+																			Cycle: Math.min(
+																				tempPlayerStats.stats.core.goals,
+																				tempPlayerStats.stats.core.assists,
+																				tempPlayerStats.stats.core.saves,
+																				tempPlayerStats.stats.core.shots
+																			),
+																			// tempPlayerStats.stats.core.goals > 0 &&
+																			// tempPlayerStats.stats.core.assists >
+																			// 	0 &&
+																			// tempPlayerStats.stats.core.saves > 0 &&
+																			// tempPlayerStats.stats.core.shots > 0,
 																			HatTrick: Math.floor(
 																				tempPlayerStats.stats.core.goals / 3
 																			),
@@ -862,6 +949,12 @@ const StatsCongregate = (props: PassedProps) => {
 																			PercentInFrontOfBall:
 																				tempPlayerStats.stats.positioning
 																					.percent_infront_ball,
+																			TimeBehindBall:
+																				tempPlayerStats.stats.positioning
+																					.time_behind_ball,
+																			PercentBehindBall:
+																				tempPlayerStats.stats.positioning
+																					.percent_behind_ball,
 																			TimeDefensiveHalf:
 																				tempPlayerStats.stats.positioning
 																					.time_defensive_half,
@@ -905,6 +998,10 @@ const StatsCongregate = (props: PassedProps) => {
 																				tempPlayerStats.stats.demo.inflicted,
 																			DemosTaken:
 																				tempPlayerStats.stats.demo.taken,
+																			GoalsAgainstLastDefender:
+																				tempPlayerStats.stats.positioning
+																					.goals_against_while_last_defender ??
+																				0,
 																			LossMVP:
 																				!playerWonGame &&
 																				tempPlayerStats.stats.core.mvp,

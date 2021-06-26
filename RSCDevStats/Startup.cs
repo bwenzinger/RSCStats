@@ -1,3 +1,4 @@
+using Google.Apis.Sheets.v4;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -60,7 +61,13 @@ namespace RSCDevStats
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "RSCDevStats", Version = "v1" });
             });
 
-            
+            //services.AddScoped< new SheetsService(new BaseClientService.Initializer()
+            //{
+            //    HttpClientInitializer = credential,
+            //    ApplicationName = _applicationName
+            //}) > ();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

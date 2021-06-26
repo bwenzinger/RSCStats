@@ -83,26 +83,32 @@ export interface IndividualGamePlayerStats {
 	Name: string
 	RSCId: string
 	OnlineId: string
+	Map?: string
+	Date?: string
 	ReplayId: string
 	ReplayTitle: string
-	Week: number
+	GameNumber: number
 	Tier: string
 	Team: string
 	OponentTeam: string
 	GamesWon?: number | undefined
 	GamesLost?: number | undefined
+	CarId?: number
+	CarName?: string
 	Score?: number | undefined
 	Goals?: number | undefined
 	Assists?: number | undefined
 	Saves?: number | undefined
 	Shots?: number | undefined
 	MVP?: boolean
-	Cycle?: boolean | undefined
+	Cycle?: number | undefined
 	HatTrick?: number | undefined
 	Playmaker?: number | undefined
 	Savior?: number | undefined
 	PointsAgainst?: number | undefined
 	GoalsAgainst?: number | undefined
+	GoalsAgainstLastDefender?: number | undefined
+	ShootingPercent?: number | undefined
 	AssistAgainst?: number | undefined
 	SavesAgainst?: number | undefined
 	ShotsAgainst?: number | undefined
@@ -146,6 +152,8 @@ export interface IndividualGamePlayerStats {
 	PercentMostForward?: number | undefined
 	TimeInFrontOfBall?: number | undefined
 	PercentInFrontOfBall?: number | undefined
+	TimeBehindBall?: number | undefined
+	PercentBehindBall?: number | undefined
 	TimeDefensiveHalf?: number | undefined
 	PercentDefensiveHalf?: number | undefined
 	TimeOffensiveHalf?: number | undefined
@@ -162,4 +170,6 @@ export interface IndividualGamePlayerStats {
 	DemosInflicted?: number | undefined
 	DemosTaken?: number | undefined
 	LossMVP?: boolean | undefined
+	Dummy1?: string | undefined
+	Dummy2?: string | undefined
 }
