@@ -1,4 +1,5 @@
 import { ColDef } from "ag-grid-community"
+import { NumberValueFormatter } from "../../components/common/NumberValueFormatter"
 import { CaseInsensitiveComparator, nameof } from "../../utils/utils"
 import { IndividualGamePlayerStats } from "../CumulativePlayerStats"
 
@@ -11,7 +12,11 @@ const ViewStatsPerGameStatsTableColDefs: ColDef[] = [
 	},
 	{ headerName: "RSCId", field: nameof<IndividualGamePlayerStats>("RSCId") },
 	{
-		headerName: "GameNumber",
+		headerName: "Day",
+		field: nameof<IndividualGamePlayerStats>("Day"),
+	},
+	{
+		headerName: "#",
 		field: nameof<IndividualGamePlayerStats>("GameNumber"),
 	},
 	{
@@ -23,15 +28,15 @@ const ViewStatsPerGameStatsTableColDefs: ColDef[] = [
 		field: nameof<IndividualGamePlayerStats>("Team"),
 	},
 	{
-		headerName: "OponentTeam",
-		field: nameof<IndividualGamePlayerStats>("OponentTeam"),
+		headerName: "OpponentTeam",
+		field: nameof<IndividualGamePlayerStats>("OpponentTeam"),
 	},
 	{
-		headerName: "GamesWon",
+		headerName: "GW",
 		field: nameof<IndividualGamePlayerStats>("GamesWon"),
 	},
 	{
-		headerName: "GamesLost",
+		headerName: "GL",
 		field: nameof<IndividualGamePlayerStats>("GamesLost"),
 	},
 	{ headerName: "Score", field: nameof<IndividualGamePlayerStats>("Score") },
@@ -77,6 +82,7 @@ const ViewStatsPerGameStatsTableColDefs: ColDef[] = [
 	{
 		headerName: "AvgBoostAmount",
 		field: nameof<IndividualGamePlayerStats>("AvgBoostAmount"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "BoostCollected",
@@ -121,10 +127,12 @@ const ViewStatsPerGameStatsTableColDefs: ColDef[] = [
 	{
 		headerName: "ZeroBoostTime",
 		field: nameof<IndividualGamePlayerStats>("ZeroBoostTime"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "HundredBoostTime",
 		field: nameof<IndividualGamePlayerStats>("HundredBoostTime"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "BoostUsedWhileSupersonic",
@@ -141,6 +149,7 @@ const ViewStatsPerGameStatsTableColDefs: ColDef[] = [
 	{
 		headerName: "AverageSpeed",
 		field: nameof<IndividualGamePlayerStats>("AverageSpeed"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TotalDistance",
@@ -149,54 +158,67 @@ const ViewStatsPerGameStatsTableColDefs: ColDef[] = [
 	{
 		headerName: "TimeSlowSpeed",
 		field: nameof<IndividualGamePlayerStats>("TimeSlowSpeed"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentSlowSpeed",
 		field: nameof<IndividualGamePlayerStats>("PercentSlowSpeed"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeBoostSpeed",
 		field: nameof<IndividualGamePlayerStats>("TimeBoostSpeed"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentBoostSpeed",
 		field: nameof<IndividualGamePlayerStats>("PercentBoostSpeed"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeSupersonic",
 		field: nameof<IndividualGamePlayerStats>("TimeSupersonic"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentSupersonic",
 		field: nameof<IndividualGamePlayerStats>("PercentSupersonic"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeOnGround",
 		field: nameof<IndividualGamePlayerStats>("TimeOnGround"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentOnGround",
 		field: nameof<IndividualGamePlayerStats>("PercentOnGround"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeLowAir",
 		field: nameof<IndividualGamePlayerStats>("TimeLowAir"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentLowAir",
 		field: nameof<IndividualGamePlayerStats>("PercentLowAir"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeHighAir",
 		field: nameof<IndividualGamePlayerStats>("TimeHighAir"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimePowerslide",
 		field: nameof<IndividualGamePlayerStats>("TimePowerslide"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "AveragePowerslideTime",
 		field: nameof<IndividualGamePlayerStats>("AveragePowerslideTime"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "CountPowerslide",
@@ -205,82 +227,101 @@ const ViewStatsPerGameStatsTableColDefs: ColDef[] = [
 	{
 		headerName: "TimeMostBack",
 		field: nameof<IndividualGamePlayerStats>("TimeMostBack"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentMostBack",
 		field: nameof<IndividualGamePlayerStats>("PercentMostBack"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeMostForward",
 		field: nameof<IndividualGamePlayerStats>("TimeMostForward"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentMostForward",
 		field: nameof<IndividualGamePlayerStats>("PercentMostForward"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeInFrontOfBall",
 		field: nameof<IndividualGamePlayerStats>("TimeInFrontOfBall"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentInFrontOfBall",
 		field: nameof<IndividualGamePlayerStats>("PercentInFrontOfBall"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeDefensiveHalf",
 		field: nameof<IndividualGamePlayerStats>("TimeDefensiveHalf"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentDefensiveHalf",
 		field: nameof<IndividualGamePlayerStats>("PercentDefensiveHalf"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeOffensiveHalf",
 		field: nameof<IndividualGamePlayerStats>("TimeOffensiveHalf"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentOffensiveHalf",
 		field: nameof<IndividualGamePlayerStats>("PercentOffensiveHalf"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeDefensiveThird",
 		field: nameof<IndividualGamePlayerStats>("TimeDefensiveThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentageDefensiveThird",
 		field: nameof<IndividualGamePlayerStats>("PercentageDefensiveThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeNeutralThird",
 		field: nameof<IndividualGamePlayerStats>("TimeNeutralThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentNeutralThird",
 		field: nameof<IndividualGamePlayerStats>("PercentNeutralThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeOffensiveThird",
 		field: nameof<IndividualGamePlayerStats>("TimeOffensiveThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentOffensiveThird",
 		field: nameof<IndividualGamePlayerStats>("PercentOffensiveThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "AverageDistanceToBall",
 		field: nameof<IndividualGamePlayerStats>("AverageDistanceToBall"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "AverageDistanceToBallHasPossession",
 		field: nameof<IndividualGamePlayerStats>(
 			"AverageDistanceToBallHasPossession"
 		),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "AverageDistanceToBallNoPossession",
 		field: nameof<IndividualGamePlayerStats>(
 			"AverageDistanceToBallNoPossession"
 		),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "DemosInflicted",

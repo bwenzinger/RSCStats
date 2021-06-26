@@ -11,21 +11,28 @@ import ViewStatsCumulativeStatsTableColDefs from "../models/ColDefs/ViewStatsCum
 import { Button } from "reactstrap"
 import { nameof } from "../utils/utils"
 import ViewStatsPerGameStatsTableColDefs from "../models/ColDefs/ViewStatsPerGameStatsTableColDefs"
+import { useRecoilState } from "recoil"
+import { PlayerDetails } from "../models/PlayerDetails"
+import { PlayerDetailsState } from "../recoil/RscImportAtom"
 
 interface PassedProps {
 	className?: string
 }
 
-const ballChasingApi = new BackendApi()
+const backendApi = new BackendApi()
 
 const ViewStats = (props: PassedProps) => {
+	const [playerDetails] = useRecoilState<PlayerDetails[] | undefined>(
+		PlayerDetailsState
+	)
+
 	const [cumulativePlayerStats, setCumulativePlayerStats] = React.useState<
-		CumulativePlayerStats[]
-	>([])
+		CumulativePlayerStats[] | undefined
+	>(undefined)
 
 	const [perGamePlayerStats, setPerGamePlayerStats] = React.useState<
-		IndividualGamePlayerStats[]
-	>([])
+		IndividualGamePlayerStats[] | undefined
+	>(undefined)
 
 	const [showCumulativeStats, setShowCumulativeStats] =
 		React.useState<boolean>(true)
@@ -36,284 +43,311 @@ const ViewStats = (props: PassedProps) => {
 			resizable: true,
 			sortable: true,
 			filter: true,
+			width: 135,
 		},
 		applyColumnDefOrder: true,
 	})
 
 	useEffect(() => {
-		ballChasingApi.instance
-			.get<IndividualGamePlayerStats[]>(`PlayerStats/GetAllWeeklyStats`)
-			.then(function (response) {
-				// handle success
-				setPerGamePlayerStats(response.data)
-				const cumulativeStats: CumulativePlayerStats[] = []
-				const processedPlayerIds: string[] = []
+		if (playerDetails && playerDetails.length > 0) {
+			backendApi.instance
+				.get<IndividualGamePlayerStats[]>(`PlayerStats/GetAllWeeklyStats`)
+				.then(function (response) {
+					// handle success
+					setPerGamePlayerStats(response.data)
+					const cumulativeStats: CumulativePlayerStats[] = []
+					const processedPlayerIds: string[] = []
 
-				new Set<string>(response.data.map((x) => x.RSCId)).forEach((rscId) => {
-					processedPlayerIds.push(rscId)
+					new Set<string>(response.data.map((x) => x.RSCId)).forEach(
+						(rscId) => {
+							processedPlayerIds.push(rscId)
 
-					let matchingPlayer = response.data.find((x) => x.RSCId === rscId)
+							let matchingPlayer = response.data.find((x) => x.RSCId === rscId)
 
-					function sumAllGameStats(propertyName: string) {
-						return allPlayerStats
-							.map((item) => item[propertyName])
-							.reduce((prev, next) => prev!! + next!!)
-					}
+							let playerContract = playerDetails?.find((x) => x.RSCId === rscId)
 
-					function averageAllGameStats(propertyName: string) {
-						return (
-							allPlayerStats
-								.map((item) => item[propertyName])
-								.reduce((prev, next) => prev!! + next!!)!! /
-							allPlayerStats.length
-						)
-					}
+							function sumAllGameStats(propertyName: string) {
+								return allPlayerStats
+									.map((item) => item[propertyName])
+									.reduce((prev, next) => prev!! + next!!)
+							}
 
-					const allPlayerStats = response.data.filter((x) => x.RSCId === rscId)
-					cumulativeStats.push({
-						Name: matchingPlayer!!.Name, //TODO should come from database
-						RSCId: rscId,
-						Tier: matchingPlayer!!.Tier,
-						Team: matchingPlayer!!.Team, //TODO should come from database
-						GamesPlayed: allPlayerStats.length,
-						GamesWon: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("GamesWon")
-						),
-						GamesLost: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("GamesLost")
-						),
-						MVPs: allPlayerStats.filter((x) => x.MVP && x.GamesWon!! > 0)
-							.length,
-						Score: sumAllGameStats(nameof<IndividualGamePlayerStats>("Score")),
-						Goals: sumAllGameStats(nameof<IndividualGamePlayerStats>("Goals")),
-						Assists: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("Assists")
-						),
-						Saves: sumAllGameStats(nameof<IndividualGamePlayerStats>("Saves")),
-						Shots: sumAllGameStats(nameof<IndividualGamePlayerStats>("Shots")),
-						Cycle: allPlayerStats.filter((x) => x.Cycle).length,
-						HatTrick: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("HatTrick")
-						),
-						Playmaker: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("Playmaker")
-						),
-						Savior: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("Savior")
-						),
-						GoalsAgainst: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("GoalsAgainst")
-						),
-						PointsAgainst: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("PointsAgainst")
-						),
-						AssistAgainst: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("AssistAgainst")
-						),
-						SavesAgainst: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("SavesAgainst")
-						),
-						ShotsAgainst: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("ShotsAgainst")
-						),
-						Bpm: averageAllGameStats(nameof<IndividualGamePlayerStats>("Bpm")),
-						AvgBoostAmount: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("AvgBoostAmount")
-						),
-						BoostCollected: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("BoostCollected")
-						),
-						BoostCollectedBigPads: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("BoostCollectedBigPads")
-						),
-						BoostCollectedSmallPads: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("BoostCollectedSmallPads")
-						),
-						CountCollectedBigPads: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("CountCollectedBigPads")
-						),
-						CountCollectedSmallPads: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("CountCollectedSmallPads")
-						),
-						BoostStolen: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("BoostStolen")
-						),
-						BoostStolenBigPads: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("BoostStolenBigPads")
-						),
-						BoostStolenSmallPads: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("BoostStolenSmallPads")
-						),
-						CountStolenBigPads: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("CountStolenBigPads")
-						),
-						CountStolenSmallpads: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("CountStolenSmallpads")
-						),
-						ZeroBoostTime: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("ZeroBoostTime")
-						),
-						HundredBoostTime: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("HundredBoostTime")
-						),
-						BoostUsedWhileSupersonic: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("BoostUsedWhileSupersonic")
-						),
-						BoostOverfillTotal: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("BoostOverfillTotal")
-						),
-						BoostOverfillStolen: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("BoostOverfillStolen")
-						),
-						AverageSpeed: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("AverageSpeed")
-						),
-						TotalDistance: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TotalDistance")
-						),
-						TimeSlowSpeed: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeSlowSpeed")
-						),
-						PercentSlowSpeed: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentSlowSpeed")
-						),
-						TimeBoostSpeed: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeBoostSpeed")
-						),
-						PercentBoostSpeed: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentBoostSpeed")
-						),
-						TimeSupersonic: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeSupersonic")
-						),
-						PercentSupersonic: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentSupersonic")
-						),
-						TimeOnGround: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeOnGround")
-						),
-						PercentOnGround: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentOnGround")
-						),
-						TimeLowAir: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeLowAir")
-						),
-						PercentLowAir: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentLowAir")
-						),
-						TimeHighAir: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeHighAir")
-						),
-						PercentHighAir: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentHighAir")
-						),
-						TimePowerslide: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimePowerslide")
-						),
-						AveragePowerslideTime: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("AveragePowerslideTime")
-						),
-						CountPowerslide: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("CountPowerslide")
-						),
-						TimeMostBack: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeMostBack")
-						),
-						PercentMostBack: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentMostBack")
-						),
-						TimeMostForward: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeMostForward")
-						),
-						PercentMostForward: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentMostForward")
-						),
-						TimeInFrontOfBall: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeInFrontOfBall")
-						),
-						PercentInFrontOfBall: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentInFrontOfBall")
-						),
-						TimeDefensiveHalf: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeDefensiveHalf")
-						),
-						PercentDefensiveHalf: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentDefensiveHalf")
-						),
-						TimeOffensiveHalf: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeOffensiveHalf")
-						),
-						PercentOffensiveHalf: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentOffensiveHalf")
-						),
-						TimeDefensiveThird: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeDefensiveThird")
-						),
-						PercentageDefensiveThird: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentageDefensiveThird")
-						),
-						TimeNeutralThird: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeNeutralThird")
-						),
-						PercentNeutralThird: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentNeutralThird")
-						),
-						TimeOffensiveThird: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("TimeOffensiveThird")
-						),
-						PercentOffensiveThird: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("PercentOffensiveThird")
-						),
-						AverageDistanceToBall: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>("AverageDistanceToBall")
-						),
-						AverageDistanceToBallHasPossession: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>(
-								"AverageDistanceToBallHasPossession"
+							function averageAllGameStats(propertyName: string) {
+								return (
+									allPlayerStats
+										.map((item) => item[propertyName])
+										.reduce((prev, next) => prev!! + next!!)!! /
+									allPlayerStats.length
+								)
+							}
+
+							const allPlayerStats = response.data.filter(
+								(x) => x.RSCId === rscId
 							)
-						),
-						AverageDistanceToBallNoPossession: averageAllGameStats(
-							nameof<IndividualGamePlayerStats>(
-								"AverageDistanceToBallNoPossession"
+
+							const wins = sumAllGameStats(
+								nameof<IndividualGamePlayerStats>("GamesWon")
 							)
-						),
-						DemosInflicted: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("DemosInflicted")
-						),
-						DemosTaken: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("DemosTaken")
-						),
-						LossMVP: sumAllGameStats(
-							nameof<IndividualGamePlayerStats>("LossMVP")
-						),
-					})
+
+							cumulativeStats.push({
+								Name: matchingPlayer!!.Name, //TODO should come from database
+								RSCId: rscId,
+								Tier: matchingPlayer!!.Tier,
+								Team: playerContract?.Team ?? "",
+								GamesPlayed: allPlayerStats.length,
+								WinPercent: (wins / allPlayerStats.length) * 100,
+								GamesWon: wins,
+								GamesLost: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("GamesLost")
+								),
+								MVPs: allPlayerStats.filter((x) => x.MVP && x.GamesWon!! > 0)
+									.length,
+								Score: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("Score")
+								),
+								Goals: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("Goals")
+								),
+								Assists: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("Assists")
+								),
+								Saves: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("Saves")
+								),
+								Shots: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("Shots")
+								),
+								Cycle: allPlayerStats.filter((x) => x.Cycle).length,
+								HatTrick: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("HatTrick")
+								),
+								Playmaker: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("Playmaker")
+								),
+								Savior: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("Savior")
+								),
+								GoalsAgainst: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("GoalsAgainst")
+								),
+								PointsAgainst: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("PointsAgainst")
+								),
+								AssistAgainst: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("AssistAgainst")
+								),
+								SavesAgainst: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("SavesAgainst")
+								),
+								ShotsAgainst: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("ShotsAgainst")
+								),
+								Bpm: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("Bpm")
+								),
+								AvgBoostAmount: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("AvgBoostAmount")
+								),
+								BoostCollected: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("BoostCollected")
+								),
+								BoostCollectedBigPads: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("BoostCollectedBigPads")
+								),
+								BoostCollectedSmallPads: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("BoostCollectedSmallPads")
+								),
+								CountCollectedBigPads: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("CountCollectedBigPads")
+								),
+								CountCollectedSmallPads: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("CountCollectedSmallPads")
+								),
+								BoostStolen: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("BoostStolen")
+								),
+								BoostStolenBigPads: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("BoostStolenBigPads")
+								),
+								BoostStolenSmallPads: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("BoostStolenSmallPads")
+								),
+								CountStolenBigPads: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("CountStolenBigPads")
+								),
+								CountStolenSmallpads: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("CountStolenSmallpads")
+								),
+								ZeroBoostTime: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("ZeroBoostTime")
+								),
+								HundredBoostTime: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("HundredBoostTime")
+								),
+								BoostUsedWhileSupersonic: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("BoostUsedWhileSupersonic")
+								),
+								BoostOverfillTotal: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("BoostOverfillTotal")
+								),
+								BoostOverfillStolen: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("BoostOverfillStolen")
+								),
+								AverageSpeed: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("AverageSpeed")
+								),
+								TotalDistance: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TotalDistance")
+								),
+								TimeSlowSpeed: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeSlowSpeed")
+								),
+								PercentSlowSpeed: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentSlowSpeed")
+								),
+								TimeBoostSpeed: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeBoostSpeed")
+								),
+								PercentBoostSpeed: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentBoostSpeed")
+								),
+								TimeSupersonic: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeSupersonic")
+								),
+								PercentSupersonic: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentSupersonic")
+								),
+								TimeOnGround: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeOnGround")
+								),
+								PercentOnGround: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentOnGround")
+								),
+								TimeLowAir: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeLowAir")
+								),
+								PercentLowAir: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentLowAir")
+								),
+								TimeHighAir: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeHighAir")
+								),
+								PercentHighAir: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentHighAir")
+								),
+								TimePowerslide: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimePowerslide")
+								),
+								AveragePowerslideTime: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("AveragePowerslideTime")
+								),
+								CountPowerslide: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("CountPowerslide")
+								),
+								TimeMostBack: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeMostBack")
+								),
+								PercentMostBack: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentMostBack")
+								),
+								TimeMostForward: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeMostForward")
+								),
+								PercentMostForward: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentMostForward")
+								),
+								TimeInFrontOfBall: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeInFrontOfBall")
+								),
+								PercentInFrontOfBall: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentInFrontOfBall")
+								),
+								TimeDefensiveHalf: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeDefensiveHalf")
+								),
+								PercentDefensiveHalf: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentDefensiveHalf")
+								),
+								TimeOffensiveHalf: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeOffensiveHalf")
+								),
+								PercentOffensiveHalf: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentOffensiveHalf")
+								),
+								TimeDefensiveThird: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeDefensiveThird")
+								),
+								PercentageDefensiveThird: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentageDefensiveThird")
+								),
+								TimeNeutralThird: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeNeutralThird")
+								),
+								PercentNeutralThird: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentNeutralThird")
+								),
+								TimeOffensiveThird: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("TimeOffensiveThird")
+								),
+								PercentOffensiveThird: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("PercentOffensiveThird")
+								),
+								AverageDistanceToBall: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>("AverageDistanceToBall")
+								),
+								AverageDistanceToBallHasPossession: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>(
+										"AverageDistanceToBallHasPossession"
+									)
+								),
+								AverageDistanceToBallNoPossession: averageAllGameStats(
+									nameof<IndividualGamePlayerStats>(
+										"AverageDistanceToBallNoPossession"
+									)
+								),
+								DemosInflicted: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("DemosInflicted")
+								),
+								DemosTaken: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("DemosTaken")
+								),
+								LossMVP: sumAllGameStats(
+									nameof<IndividualGamePlayerStats>("LossMVP")
+								),
+							})
+						}
+					)
+
+					setCumulativePlayerStats(cumulativeStats)
+					if (showCumulativeStats) {
+						gridOptions.api?.setRowData(cumulativeStats)
+						gridOptions.api?.setColumnDefs(ViewStatsCumulativeStatsTableColDefs)
+					} else {
+						gridOptions.api?.setRowData(response.data)
+						gridOptions.api?.setColumnDefs(ViewStatsPerGameStatsTableColDefs)
+					}
 				})
-
-				setCumulativePlayerStats(cumulativeStats)
-				if (showCumulativeStats) {
-					gridOptions.api?.setRowData(cumulativeStats)
-					gridOptions.api?.setColumnDefs(ViewStatsCumulativeStatsTableColDefs)
-				} else {
-					gridOptions.api?.setRowData(response.data)
-					gridOptions.api?.setColumnDefs(ViewStatsPerGameStatsTableColDefs)
-				}
-			})
-			.catch(function (error) {
-				// handle error
-				console.log(error)
-			})
-			.then(function () {
-				// always executed
-			})
-	}, [])
+				.catch(function (error) {
+					// handle error
+					console.log(error)
+				})
+				.then(function () {
+					// always executed
+				})
+		}
+	}, [playerDetails])
 
 	React.useEffect(() => {
 		if (showCumulativeStats) {
-			gridOptions.api?.setRowData(cumulativePlayerStats)
-			gridOptions.api?.setColumnDefs(ViewStatsCumulativeStatsTableColDefs)
+			if (cumulativePlayerStats) {
+				gridOptions.api?.setRowData(cumulativePlayerStats)
+				gridOptions.api?.setColumnDefs(ViewStatsCumulativeStatsTableColDefs)
+			}
 		} else {
-			gridOptions.api?.setRowData(perGamePlayerStats)
-			gridOptions.api?.setColumnDefs(ViewStatsPerGameStatsTableColDefs)
+			if (perGamePlayerStats) {
+				gridOptions.api?.setRowData(perGamePlayerStats)
+				gridOptions.api?.setColumnDefs(ViewStatsPerGameStatsTableColDefs)
+			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [showCumulativeStats])
@@ -341,7 +375,8 @@ const ViewStats = (props: PassedProps) => {
 			<div className={"ag-theme-material stats-grid material-drop-shadow"}>
 				<AgGridReact
 					gridOptions={gridOptions}
-					columnDefs={ViewStatsCumulativeStatsTableColDefs}
+					// rowData={undefined}
+					// columnDefs={ViewStatsCumulativeStatsTableColDefs}
 					// onGridReady={(params) => {
 					// 	params.api?.sizeColumnsToFit()
 					// }}

@@ -6,27 +6,35 @@ namespace RSCWebApi
     [Table("weekly_player_stats")]
     public class IndividualGamePlayerStatsDB
     {
-        //[Key, Column("rsc_id")]
-        public string RSCId { get; set; }
-		//[Key]
-		public string ReplayId { get; set; }
-		public string ReplayTitle { get; set; }
+		[Key]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public int Id { get; set; }
+		//[Key, Column("rsc_id")]
+		public string RSCId { get; set; }
 		public string Name { get; set; }
-		public int Week { get; set; }
-
-		public string OnlineId { get; set; }
-		public string Tier { get; set; }
 		public string Team { get; set; }
-		public string OponentTeam { get; set; }
+		public int Day { get; set; }
+		public int GameNumber { get; set; }
 		public int GamesWon { get; set; }
 		public int GamesLost { get; set; }
+		public bool MVP { get; set; }
 		public int Score { get; set; }
-		public int Goals { get; set; }
+        //[Key]
+        //public string ReplayId { get; set; }
+        //public string ReplayTitle { get; set; }
+        //public string Map { get; set; }
+        //public string Date { get; set; }
+
+        //public string OnlineId { get; set; }
+        //public string Tier { get; set; }
+        public string OpponentTeam { get; set; }
+        //public int CarId { get; set; }
+        //public string CarName { get; set; }
+        public int Goals { get; set; }
 		public int Assists { get; set; }
 		public int Saves { get; set; }
 		public int Shots { get; set; }
-		public bool MVP { get; set; }
-		public bool Cycle { get; set; }
+		public int Cycle { get; set; }
 		public int HatTrick { get; set; }
 		public int Playmaker { get; set; }
 		public int Savior { get; set; }
@@ -35,6 +43,7 @@ namespace RSCWebApi
 		public int AssistAgainst { get; set; }
 		public int SavesAgainst { get; set; }
 		public int ShotsAgainst { get; set; }
+		public string Tier { get; set; }
 		public double bpm { get; set; }
 		public double AvgBoostAmount { get; set; }
 		public int BoostCollected { get; set; }
@@ -75,6 +84,8 @@ namespace RSCWebApi
 		public double PercentMostForward { get; set; }
 		public double TimeInFrontOfBall { get; set; }
 		public double PercentInFrontOfBall { get; set; }
+		public double TimeBehindBall { get; set; }
+		public double PercentBehindBall { get; set; }
 		public double TimeDefensiveHalf { get; set; }
 		public double PercentDefensiveHalf { get; set; }
 		public double TimeOffensiveHalf { get; set; }

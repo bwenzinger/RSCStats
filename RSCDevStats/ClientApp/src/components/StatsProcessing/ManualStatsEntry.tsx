@@ -218,7 +218,7 @@ const ManualStatsEntry = (props: Props) => {
 					GameNumber: -1,
 					Tier: selectedLeague!!,
 					Team: "",
-					OponentTeam: "",
+					OpponentTeam: "",
 					GamesWon: nodeData.Won ? 1 : 0,
 					GamesLost: nodeData.Won ? 0 : 1,
 					MVP: nodeData.MVP,

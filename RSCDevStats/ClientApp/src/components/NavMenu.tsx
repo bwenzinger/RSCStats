@@ -75,7 +75,7 @@ class NavMenu extends Component<Props, State> {
 				</NavLink>
 				{/* </NavItem>
 						<NavItem> */}
-				<NavLink tag={Link} className="navmenu-navlink" to="/statsstuff">
+				<NavLink tag={Link} className="navmenu-navlink" to="/stats-processing">
 					Stats Processing
 				</NavLink>
 				{/* </NavItem>

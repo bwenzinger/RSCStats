@@ -26,8 +26,9 @@ namespace RSCWebApi
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<IndividualGamePlayerStatsDB>()
-                .HasKey(c => new { c.RSCId, c.ReplayId });
+            //modelBuilder.Entity<IndividualGamePlayerStatsDB>()
+            //    .HasKey(c => new { c.RSCId, c.ReplayId });
+            //modelBuilder.Entity<IndividualGamePlayerStatsDB>().HasNoKey();
 
             modelBuilder.Entity<MatchResultsDB>()
                 .HasKey(c => new { c.Tier, c.Week, c.HomeTeam, c.AwayTeam });

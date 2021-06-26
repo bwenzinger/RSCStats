@@ -450,7 +450,7 @@ const StatsCongregate = (props: PassedProps) => {
 		// 		"Replay Title",
 		// 		"Tier",
 		// 		"Team",
-		// 		"Oponent Team",
+		// 		"Opponent Team",
 		// 		"Wins",
 		// 		"Losses",
 		// 		"Score",
@@ -589,29 +589,14 @@ const StatsCongregate = (props: PassedProps) => {
 								const team2: TeamsEntity = teams[1]
 								if (team1 && team2 && team1.players && team2.players) {
 									const mappedTeam1Players = team1.players.map((x) => x.id)
-									// const team1Players = playerDetails?.filter(
-									// 	//TODO MIGHT NEED TO FIX THIS
-									// 	(x) =>
-									// 		mappedTeam1Players.some(
-									// 			(y) =>
-									// 				// y.includes(
-									// 				x.PlayerTrackerLinks.map((z) => z.PlatformId) ?? []
-									// 			// )
-									// 		) && x.Team
-									// )
 									const team1Players = playerDetails?.filter(
-										//TODO MIGHT NEED TO FIX THIS
 										(x) =>
 											x.PlayerTrackerLinks.some((y) =>
 												mappedTeam1Players.includes(y.PlatformId)
 											) && x.Team
 									)
 									const mappedTeam2Players = team2.players.map((x) => x.id)
-									// const team2Players = playerContracts?.filter(
-									// 	(x) => mappedTeam2Players.includes(x.OnlineId) && x.Team
-									// )
 									const team2Players = playerDetails?.filter(
-										//TODO MIGHT NEED TO FIX THIS
 										(x) =>
 											x.PlayerTrackerLinks.some((y) =>
 												mappedTeam2Players.includes(y.PlatformId)
@@ -784,7 +769,7 @@ const StatsCongregate = (props: PassedProps) => {
 																			GameNumber: groupInt,
 																			Tier: selectedLeagueGroup?.name ?? "",
 																			Team: groupPlayerBeingProcessed.team, //TODO THIS SHOULD COME FROM RSC SOMEWHERE
-																			OponentTeam:
+																			OpponentTeam:
 																				getReplaysForDayGroupResponse.data
 																					.list!![0][
 																					playerTeamIsBlue ? "orange" : "blue"

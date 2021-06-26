@@ -1,4 +1,5 @@
 import { ColDef } from "ag-grid-community"
+import { NumberValueFormatter } from "../../components/common/NumberValueFormatter"
 import { CaseInsensitiveComparator, nameof } from "../../utils/utils"
 import { CumulativePlayerStats } from "../CumulativePlayerStats"
 
@@ -14,13 +15,18 @@ const ViewStatsCumulativeStatsTableColDefs: ColDef[] = [
 	{ headerName: "Tier", field: nameof<CumulativePlayerStats>("Tier") },
 	{ headerName: "Team", field: nameof<CumulativePlayerStats>("Team") },
 	{
-		headerName: "Games Played",
+		headerName: "GP",
 		field: nameof<CumulativePlayerStats>("GamesPlayed"),
 	},
-	{ headerName: "Games Won", field: nameof<CumulativePlayerStats>("GamesWon") },
+	{ headerName: "GW", field: nameof<CumulativePlayerStats>("GamesWon") },
 	{
-		headerName: "Games Lost",
+		headerName: "GL",
 		field: nameof<CumulativePlayerStats>("GamesLost"),
+	},
+	{
+		headerName: "Win%",
+		field: nameof<CumulativePlayerStats>("WinPercent"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{ headerName: "MVPs", field: nameof<CumulativePlayerStats>("MVPs") },
 	{ headerName: "Score", field: nameof<CumulativePlayerStats>("Score") },
@@ -58,6 +64,7 @@ const ViewStatsCumulativeStatsTableColDefs: ColDef[] = [
 	{
 		headerName: "AvgBoostAmount",
 		field: nameof<CumulativePlayerStats>("AvgBoostAmount"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "BoostCollected",
@@ -102,10 +109,12 @@ const ViewStatsCumulativeStatsTableColDefs: ColDef[] = [
 	{
 		headerName: "ZeroBoostTime",
 		field: nameof<CumulativePlayerStats>("ZeroBoostTime"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "HundredBoostTime",
 		field: nameof<CumulativePlayerStats>("HundredBoostTime"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "BoostUsedWhileSupersonic",
@@ -122,6 +131,7 @@ const ViewStatsCumulativeStatsTableColDefs: ColDef[] = [
 	{
 		headerName: "AverageSpeed",
 		field: nameof<CumulativePlayerStats>("AverageSpeed"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TotalDistance",
@@ -130,58 +140,72 @@ const ViewStatsCumulativeStatsTableColDefs: ColDef[] = [
 	{
 		headerName: "TimeSlowSpeed",
 		field: nameof<CumulativePlayerStats>("TimeSlowSpeed"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentSlowSpeed",
 		field: nameof<CumulativePlayerStats>("PercentSlowSpeed"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeBoostSpeed",
 		field: nameof<CumulativePlayerStats>("TimeBoostSpeed"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentBoostSpeed",
 		field: nameof<CumulativePlayerStats>("PercentBoostSpeed"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeSupersonic",
 		field: nameof<CumulativePlayerStats>("TimeSupersonic"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentSupersonic",
 		field: nameof<CumulativePlayerStats>("PercentSupersonic"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeOnGround",
 		field: nameof<CumulativePlayerStats>("TimeOnGround"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentOnGround",
 		field: nameof<CumulativePlayerStats>("PercentOnGround"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeLowAir",
 		field: nameof<CumulativePlayerStats>("TimeLowAir"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentLowAir",
 		field: nameof<CumulativePlayerStats>("PercentLowAir"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeHighAir",
 		field: nameof<CumulativePlayerStats>("TimeHighAir"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentHighAir",
 		field: nameof<CumulativePlayerStats>("PercentHighAir"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimePowerslide",
 		field: nameof<CumulativePlayerStats>("TimePowerslide"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "AveragePowerslideTime",
 		field: nameof<CumulativePlayerStats>("AveragePowerslideTime"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "CountPowerslide",
@@ -190,78 +214,97 @@ const ViewStatsCumulativeStatsTableColDefs: ColDef[] = [
 	{
 		headerName: "TimeMostBack",
 		field: nameof<CumulativePlayerStats>("TimeMostBack"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentMostBack",
 		field: nameof<CumulativePlayerStats>("PercentMostBack"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeMostForward",
 		field: nameof<CumulativePlayerStats>("TimeMostForward"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentMostForward",
 		field: nameof<CumulativePlayerStats>("PercentMostForward"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeInFrontOfBall",
 		field: nameof<CumulativePlayerStats>("TimeInFrontOfBall"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentInFrontOfBall",
 		field: nameof<CumulativePlayerStats>("PercentInFrontOfBall"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeDefensiveHalf",
 		field: nameof<CumulativePlayerStats>("TimeDefensiveHalf"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentDefensiveHalf",
 		field: nameof<CumulativePlayerStats>("PercentDefensiveHalf"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeOffensiveHalf",
 		field: nameof<CumulativePlayerStats>("TimeOffensiveHalf"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentOffensiveHalf",
 		field: nameof<CumulativePlayerStats>("PercentOffensiveHalf"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeDefensiveThird",
 		field: nameof<CumulativePlayerStats>("TimeDefensiveThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentageDefensiveThird",
 		field: nameof<CumulativePlayerStats>("PercentageDefensiveThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeNeutralThird",
 		field: nameof<CumulativePlayerStats>("TimeNeutralThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentNeutralThird",
 		field: nameof<CumulativePlayerStats>("PercentNeutralThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "TimeOffensiveThird",
 		field: nameof<CumulativePlayerStats>("TimeOffensiveThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "PercentOffensiveThird",
 		field: nameof<CumulativePlayerStats>("PercentOffensiveThird"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "AverageDistanceToBall",
 		field: nameof<CumulativePlayerStats>("AverageDistanceToBall"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "AverageDistanceToBallHasPossession",
 		field: nameof<CumulativePlayerStats>("AverageDistanceToBallHasPossession"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "AverageDistanceToBallNoPossession",
 		field: nameof<CumulativePlayerStats>("AverageDistanceToBallNoPossession"),
+		valueFormatter: NumberValueFormatter,
 	},
 	{
 		headerName: "DemosInflicted",

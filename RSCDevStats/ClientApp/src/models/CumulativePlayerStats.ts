@@ -4,6 +4,7 @@ export interface CumulativePlayerStats {
 	Tier: string
 	Team: string
 	GamesPlayed?: number | undefined
+	WinPercent?: number | undefined
 	GamesWon?: number | undefined
 	GamesLost?: number | undefined
 	MVPs?: number | undefined
@@ -90,7 +91,7 @@ export interface IndividualGamePlayerStats {
 	GameNumber: number
 	Tier: string
 	Team: string
-	OponentTeam: string
+	OpponentTeam: string
 	GamesWon?: number | undefined
 	GamesLost?: number | undefined
 	CarId?: number
@@ -170,6 +171,7 @@ export interface IndividualGamePlayerStats {
 	DemosInflicted?: number | undefined
 	DemosTaken?: number | undefined
 	LossMVP?: boolean | undefined
+	Day?: number
 	Dummy1?: string | undefined
 	Dummy2?: string | undefined
 }

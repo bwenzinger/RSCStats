@@ -31,8 +31,8 @@ const WeeklyPerGameStatsTableColDefs: ColDef[] = [
 	},
 	{ headerName: "Team", field: nameof<IndividualGamePlayerStats>("Team") },
 	{
-		headerName: "OponentTeam",
-		field: nameof<IndividualGamePlayerStats>("OponentTeam"),
+		headerName: "OpponentTeam",
+		field: nameof<IndividualGamePlayerStats>("OpponentTeam"),
 	},
 	{
 		headerName: "Name",
