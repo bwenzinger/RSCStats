@@ -1,7 +1,10 @@
 using Google.Apis.Sheets.v4;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using RSCWebApi;
 using System;
+using Microsoft.AspNet.Identity;
 
 namespace RSCDevStats
 {
@@ -34,6 +38,15 @@ namespace RSCDevStats
             //        .EnableSensitiveDataLogging() // <-- These two calls are optional but help
             //        .EnableDetailedErrors()       // <-- with debugging (remove for production).
             //);
+
+            services.AddAuthentication("BasicAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+                //.AddCookie(DefaultAuthenticationTypes.ApplicationCookie, options =>
+                //{
+
+                //    options.LoginPath = "/Login";
+                //    options.LogoutPath = "/Logout";
+                //}); ;
 
             services.AddMvc()
                 .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
@@ -67,6 +80,15 @@ namespace RSCDevStats
             //    ApplicationName = _applicationName
             //}) > ();
 
+            
+
+            //services.AddAuthorization(options =>
+            //{
+            //    options.AddPolicy("BasicAuthentication", new AuthorizationPolicyBuilder("BasicAuthentication").RequireAuthenticatedUser().Build());
+            //});
+
+            services.AddScoped<IUserService, UserService>();
+
 
         }
 
@@ -91,6 +113,10 @@ namespace RSCDevStats
             app.UseSpaStaticFiles();
 
             app.UseRouting();
+
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

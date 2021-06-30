@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
@@ -17,6 +18,7 @@ using static RSCWebApi.EntityFrameworkDatabaseContext;
 
 namespace RSCWebApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class BallChasingApiController : ControllerBase
@@ -24,11 +26,9 @@ namespace RSCWebApi.Controllers
 
         private readonly ILogger<BallChasingApiController> _logger;
         private readonly IConfiguration _configuration;
-        //private readonly EntityFrameworkDatabaseContext _context;
 
 
-
-        //public BallChasingApiController(IConfiguration configuration, ILogger<BallChasingApiController> logger, IServiceProvider serviceProvider)
+        
         public BallChasingApiController(IConfiguration configuration, ILogger<BallChasingApiController> logger)
         {
             _configuration = configuration;
@@ -41,6 +41,7 @@ namespace RSCWebApi.Controllers
         [Route("GetGroupsByCreator/{creator}")]
         public List<BallChasingGroup> GetGroupsByCreator(string creator)
         {
+            Debug.WriteLine(User.Identity.Name);
             //Console.WriteLine(DateTime.Now.ToString());
             var ballChasingClient = new BallChasingClient();
 

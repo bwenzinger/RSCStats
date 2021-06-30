@@ -43,9 +43,10 @@ const ViewStats = (props: PassedProps) => {
 			resizable: true,
 			sortable: true,
 			filter: true,
-			width: 135,
+			// width: 135,
 		},
 		applyColumnDefOrder: true,
+		suppressColumnVirtualisation: true,
 	})
 
 	useEffect(() => {
@@ -322,9 +323,19 @@ const ViewStats = (props: PassedProps) => {
 					if (showCumulativeStats) {
 						gridOptions.api?.setRowData(cumulativeStats)
 						gridOptions.api?.setColumnDefs(ViewStatsCumulativeStatsTableColDefs)
+						if (gridOptions.columnApi) {
+							gridOptions.columnApi.autoSizeColumns(
+								gridOptions.columnApi!.getAllColumns()!
+							)
+						}
 					} else {
 						gridOptions.api?.setRowData(response.data)
 						gridOptions.api?.setColumnDefs(ViewStatsPerGameStatsTableColDefs)
+						if (gridOptions.columnApi) {
+							gridOptions.columnApi.autoSizeColumns(
+								gridOptions.columnApi!.getAllColumns()!
+							)
+						}
 					}
 				})
 				.catch(function (error) {
