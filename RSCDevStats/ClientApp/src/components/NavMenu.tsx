@@ -1,99 +1,52 @@
-import React, { Component } from "react"
-import {
-	Collapse,
-	Container,
-	Navbar,
-	NavbarBrand,
-	NavbarToggler,
-	NavItem,
-	NavLink,
-} from "reactstrap"
+import React from "react"
+import { NavLink } from "reactstrap"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
+import { UserCredentialsState } from "../recoil/UserCredentialsAtom"
+import { useRecoilState } from "recoil"
 
-type State = {
-	collapsed: boolean
-}
-type Props = {
+interface PassedProps {
 	className?: string
 }
 
-class NavMenu extends Component<Props, State> {
-	static displayName = NavMenu.name
+// type State = {
+// 	collapsed: boolean
+// }
+// type Props = {
+// 	className?: string
+// }
 
-	// constructor(props: any) {
-	// 	super(props)
+const NavMenu = (props: PassedProps) => {
+	// static displayName = NavMenu.name
 
-	// 	// this.toggleNavbar = this.toggleNavbar.bind(this)
-	// 	// this.state = {
-	// 	// 	collapsed: true,
-	// 	// }
-	// }
+	const [userCredentials] = useRecoilState(UserCredentialsState)
 
-	// toggleNavbar() {
-	// 	this.setState({
-	// 		collapsed: !this.state.collapsed,
-	// 	})
-	// }
-
-	render() {
-		return (
-			/* <Navbar
-					color="dark"
-					className="navbar-expand-sm navbar-toggleable-sm ng-dark box-shadow"
-					dark={true}
-					style={{ backgroundColor: "#f1f1f1" }}
-				> */
-			<div
-				className={
-					this.props.className + " navmenu-navbar material-drop-shadow"
-				}
-			>
-				{/* <Container> */}
-				{/* <NavbarBrand className="navmenu-brand" tag={Link} to="/">
-						RSCStats
-					</NavbarBrand> */}
-				<NavLink tag={Link} className="navmenu-brand" to="/">
-					RSC Stats
-				</NavLink>
-				{/* <div className="navmenu-brand2">RSCStats</div> */}
-				{/* <NavbarToggler onClick={this.toggleNavbar} className="mr-2" /> */}
-				{/* <Collapse
-							className="d-sm-inline-flex flex-sm-row-reverse"
-							isOpen={!this.state.collapsed}
-							navbar
-						> */}
-				{/* <ul className="navbar-nav flex-grow"> */}
-				{/* <NavItem> */}
-				{/* <NavLink tag={Link} className="navmenu-navlink" to="/">
-					Home
-				</NavLink> */}
-				{/* </NavItem>
-						<NavItem> */}
-				<NavLink tag={Link} className="navmenu-navlink" to="/upload">
-					Replay Upload
-				</NavLink>
-				{/* </NavItem>
-						<NavItem> */}
+	return (
+		<div className={props.className + " navmenu-navbar material-drop-shadow"}>
+			<NavLink tag={Link} className="navmenu-brand" to="/">
+				RSC Stats
+			</NavLink>
+			{/* <NavLink tag={Link} className="navmenu-navlink" to="/upload">
+				Replay Upload
+			</NavLink> */}
+			{userCredentials && (
 				<NavLink tag={Link} className="navmenu-navlink" to="/stats-processing">
-					Stats Processing
+					Stats Admin
 				</NavLink>
-				{/* </NavItem>
-						<NavItem> */}
-				<NavLink tag={Link} className="navmenu-navlink" to="/viewstats">
-					View Stats
+			)}
+			<NavLink tag={Link} className="navmenu-navlink" to="/playerstats">
+				Player Stats
+			</NavLink>
+			<NavLink tag={Link} className="navmenu-navlink" to="/standings">
+				Standings & Results
+			</NavLink>
+			{!userCredentials && (
+				<NavLink tag={Link} className="navmenu-navlink" to="/login">
+					Admin Login
 				</NavLink>
-				<NavLink tag={Link} className="navmenu-navlink" to="/standings">
-					Standings & Results
-				</NavLink>
-				{/* </NavItem> */}
-				{/* </ul> */}
-				{/* </Container> */}
-			</div>
-			/* </Collapse> */
-			/* </Navbar> */
-		)
-	}
+			)}
+		</div>
+	)
 }
 
 export default styled(NavMenu)`

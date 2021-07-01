@@ -16,6 +16,8 @@ import { LeagueTeam } from "./models/LeagueTeam"
 import ViewStandings from "./components/ViewStandings"
 import StatsProcessing from "./components/StatsProcessing/StatsProcessing"
 import styled from "styled-components"
+import LoginPage from "./components/LoginPage"
+import { UserCredentialsState } from "./recoil/UserCredentialsAtom"
 
 interface PassedProps {
 	className?: string
@@ -82,6 +84,8 @@ const App = (props: PassedProps) => {
 
 	const [leagueTeams, setLeagueTeams] = useRecoilState(LeagueTeamsState)
 
+	const [userCredentials] = useRecoilState(UserCredentialsState)
+
 	useEffect(() => {
 		backendApi.instance
 			.get<PlayerDetails[]>(`GoogleSheets/GetAllPlayers`)
@@ -117,10 +121,11 @@ const App = (props: PassedProps) => {
 			<ThemeProvider theme={theme}>
 				<Layout>
 					<Route exact path="/" component={ViewStats} />
-					<Route path="/upload" component={ReplayUpload} />
+					{/* <Route path="/upload" component={ReplayUpload} /> */}
 					<Route path="/stats-processing" component={StatsProcessing} />
-					<Route path="/viewstats" component={ViewStats} />
+					<Route path="/playerstats" component={ViewStats} />
 					<Route path="/standings" component={ViewStandings} />
+					{!userCredentials && <Route path="/login" component={LoginPage} />}
 					{/* <Route path="/fetch-data" component={FetchData} /> */}
 				</Layout>
 			</ThemeProvider>

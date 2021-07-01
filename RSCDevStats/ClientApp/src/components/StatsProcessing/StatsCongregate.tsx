@@ -30,7 +30,7 @@ import {
 	PlayerDetailsState,
 } from "../../recoil/RscImportAtom"
 import { PlayerDetails } from "../../models/PlayerDetails"
-// import { Schedule } from "./models/Scheduling"
+import { UserCredentialsState } from "../../recoil/UserCredentialsAtom"
 
 interface PassedProps {
 	className?: string
@@ -137,10 +137,18 @@ const StatsCongregate = (props: PassedProps) => {
 	const processedRequestsRef = React.useRef<number>(0)
 	const outStandingRequestsRef = React.useRef<number>(0)
 
+	const [userCredentials, setUserCredentials] =
+		useRecoilState(UserCredentialsState)
+
+	const authHeader = "Basic " + userCredentials
+
 	useEffect(() => {
 		backendApi.instance
 			.get<BallChasingGroup[]>(
-				`BallChasingApi/GetGroupsByCreator/76561199096013422`
+				`BallChasingApi/GetGroupsByCreator/76561199096013422`,
+				{
+					headers: { Authorization: authHeader },
+				}
 			) //this is the RSC steam
 			.then(function (response) {
 				// handle success
@@ -148,7 +156,10 @@ const StatsCongregate = (props: PassedProps) => {
 
 				backendApi.instance
 					.get<BallChasingGroup[]>(
-						`BallChasingApi/GetGroupsByParentGroup/${groupId}`
+						`BallChasingApi/GetGroupsByParentGroup/${groupId}`,
+						{
+							headers: { Authorization: authHeader },
+						}
 					)
 					.then(function (response) {
 						// handle success
@@ -165,6 +176,9 @@ const StatsCongregate = (props: PassedProps) => {
 			.catch(function (error) {
 				// handle error
 				console.log(error)
+				if (error.response.status === 401) {
+					setUserCredentials(undefined)
+				}
 			})
 			.then(function () {
 				// always executed
@@ -475,7 +489,10 @@ const StatsCongregate = (props: PassedProps) => {
 
 		backendApi.instance
 			.get<BallChasingGroup[]>(
-				`BallChasingApi/GetGroupsByParentGroup/${group.id}`
+				`BallChasingApi/GetGroupsByParentGroup/${group.id}`,
+				{
+					headers: { Authorization: authHeader },
+				}
 			)
 			.then(function (response) {
 				// handle success
@@ -501,14 +518,20 @@ const StatsCongregate = (props: PassedProps) => {
 		}
 		backendApi.instance
 			.get<BallChasingGroup[]>(
-				`BallChasingApi/GetGroupsByParentGroup/${group.id}`
+				`BallChasingApi/GetGroupsByParentGroup/${group.id}`,
+				{
+					headers: { Authorization: authHeader },
+				}
 			)
 			.then(function (response) {
 				// handle success
 				if (response.data.length === 1) {
 					backendApi.instance
 						.get<BallChasingGroup[]>(
-							`BallChasingApi/GetGroupsByParentGroup/${response.data[0].id}`
+							`BallChasingApi/GetGroupsByParentGroup/${response.data[0].id}`,
+							{
+								headers: { Authorization: authHeader },
+							}
 						)
 						.then(function (response) {
 							// handle success
@@ -562,7 +585,10 @@ const StatsCongregate = (props: PassedProps) => {
 		const groupInt = parseInt(group?.name.match(/\d+/g)?.toString() ?? "") ?? -1
 		backendApi.instance
 			.get<BallChasingGroup[]>(
-				`BallChasingApi/GetGroupsByParentGroup/${group.id}`
+				`BallChasingApi/GetGroupsByParentGroup/${group.id}`,
+				{
+					headers: { Authorization: authHeader },
+				}
 			)
 			.then(function (response) {
 				// handle success
@@ -580,7 +606,10 @@ const StatsCongregate = (props: PassedProps) => {
 					// setTimeout(function () {
 					backendApiRateLimited.instance
 						.get<BallChasingGroupStats>(
-							`BallChasingApi/GetGroupById/${item.id}`
+							`BallChasingApi/GetGroupById/${item.id}`,
+							{
+								headers: { Authorization: authHeader },
+							}
 						)
 						.then(function (getDayGroupByIdResponse) {
 							const teams = getDayGroupByIdResponse.data.teams
@@ -626,7 +655,10 @@ const StatsCongregate = (props: PassedProps) => {
 
 							backendApiRateLimited.instance
 								.get<ReplayStatsRoot>(
-									`BallChasingApi/GetReplaysByGroup/${item.id}`
+									`BallChasingApi/GetReplaysByGroup/${item.id}`,
+									{
+										headers: { Authorization: authHeader },
+									}
 								)
 								.then(function (getReplaysForDayGroupResponse) {
 									const detailedReplays: BallChasingReplay[] = []
@@ -636,7 +668,10 @@ const StatsCongregate = (props: PassedProps) => {
 										setOutStandingRequests(outStandingRequestsRef.current)
 										backendApiRateLimited.instance
 											.get<BallChasingReplay>(
-												`BallChasingApi/GetReplayById/${replay.id}`
+												`BallChasingApi/GetReplayById/${replay.id}`,
+												{
+													headers: { Authorization: authHeader },
+												}
 											)
 											.then(function (getSingleReplayResponse) {
 												processedRequestsRef.current++
