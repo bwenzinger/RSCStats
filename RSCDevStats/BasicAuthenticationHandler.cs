@@ -43,16 +43,16 @@ namespace RSCDevStats
             var credentials = Encoding.UTF8.GetString(credentialBytes).Split(new[] { ':' }, 2);
             var username = credentials[0];
             var password = credentials[1];
-            if(!_userService.AuthenticateSuccessful(username, password) == true)
+            if (!_userService.AuthenticateSuccessful(username, password) == true)
             {
                 return AuthenticateResult.Fail("Invalid Authorization Header");
             }
 
 
             var claims = new[] {
-            new Claim(ClaimTypes.NameIdentifier, "RSCadmin"),
-            new Claim(ClaimTypes.Name, "RSCadmin"),
-        };
+                new Claim(ClaimTypes.NameIdentifier, "RSCadmin"),
+                new Claim(ClaimTypes.Name, "RSCadmin"),
+            };
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
@@ -62,7 +62,7 @@ namespace RSCDevStats
 
         protected override Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            Response.Headers["WWW-Authenticate"] = "Basic realm=\"\", charset=\"UTF-8\"";
+            //Response.Headers["WWW-Authenticate"] = "Basic realm=\"\", charset=\"UTF-8\"";
             return base.HandleChallengeAsync(properties);
         }
     }

@@ -17,7 +17,6 @@ import {
 	BallChasingReplayPlayersEntity,
 } from "../../models/BallChasingReplay"
 import { AgGridReact } from "ag-grid-react"
-// import WeeklyCumulativeStatsTableColDefs from "../models/WeeklyCumulativeStatsTableColDefs"
 import { GridOptions } from "ag-grid-community"
 import { Button, Modal, ModalBody, ModalFooter } from "reactstrap"
 import WeeklyCumulativeStatsTableColDefs from "../../models/ColDefs/WeeklyCumulativeStatsTableColDefs"
@@ -39,38 +38,13 @@ interface PassedProps {
 	isDragActive?: boolean
 }
 
-// const playerTrackerIdsState = atom<PlayerTrackerId[] | undefined>({
-// 	key: "playerTrackerIds", // unique ID (with respect to other atoms/selectors)
-// 	default: undefined, // default value (aka initial value)
-// })
-
-// const playerContractsState = atom<PlayerContract[] | undefined>({
-// 	key: "playerContracts", // unique ID (with respect to other atoms/selectors)
-// 	default: undefined, // default value (aka initial value)
-// })
-
-// const leagueTeamsState = atom<LeagueTeam[] | undefined>({
-// 	key: "leagueTeams", // unique ID (with respect to other atoms/selectors)
-// 	default: undefined, // default value (aka initial value)
-// })
-
-// const rawStatsGoogleSheet = "1y4abHsJrmkdQAGGNW7ZAVpnrL3lZVN5Eh4bnsxWfHlo"
-
 const backendApi = new BackendApi()
 const backendApiRateLimited = new BackendApiRateLimited()
 
 const StatsCongregate = (props: PassedProps) => {
-	// const [schedule, setSchedule] = React.useState<Schedule[]>()
-
-	// const [playerTrackerIds, setPlayerTrackerIds] =
-	// 	React.useState<PlayerTrackerId[]>()
-
 	const [playerDetails] = useRecoilState<PlayerDetails[] | undefined>(
 		PlayerDetailsState
 	)
-
-	// const [playerContracts, setPlayerContracts] =
-	// 	useRecoilState(PlayerContractsState)
 
 	const [leagueTeams] = useRecoilState(LeagueTeamsState)
 
@@ -176,7 +150,7 @@ const StatsCongregate = (props: PassedProps) => {
 			.catch(function (error) {
 				// handle error
 				console.log(error)
-				if (error.response.status === 401) {
+				if (error?.response?.status === 401) {
 					setUserCredentials(undefined)
 				}
 			})
@@ -206,19 +180,22 @@ const StatsCongregate = (props: PassedProps) => {
 				{playerDetails && playerDetails.length > 0 && !selectedSeasonGroup && (
 					<div>Please select a season</div>
 				)}
-				{!selectedSeasonGroup && ballChasingSeasonGroups && (
-					<div>
-						{ballChasingSeasonGroups.map((element) => (
-							<Button
-								className="ballchasing-group-button action-button-color material-drop-shadow"
-								onClick={() => onSeasonGroupClick(element)}
-								key={"ballchasing-group-" + element.name}
-							>
-								{element.name}
-							</Button>
-						))}
-					</div>
-				)}
+				{playerDetails &&
+					playerDetails.length > 0 &&
+					!selectedSeasonGroup &&
+					ballChasingSeasonGroups && (
+						<div>
+							{ballChasingSeasonGroups.map((element) => (
+								<Button
+									className="ballchasing-group-button action-button-color material-drop-shadow"
+									onClick={() => onSeasonGroupClick(element)}
+									key={"ballchasing-group-" + element.name}
+								>
+									{element.name}
+								</Button>
+							))}
+						</div>
+					)}
 				{selectedLeagueGroup && <div>Selected: {selectedLeagueGroup.name}</div>}
 				{!selectedLeagueGroup &&
 					selectedSeasonGroup &&
@@ -432,8 +409,11 @@ const StatsCongregate = (props: PassedProps) => {
 
 		backendApi.instance
 			.post<IndividualGamePlayerStats[]>(
-				`PlayerStats/InsertWeeklyStats`,
-				playerStatsToUpload
+				`GoogleSheets/WritePlayerStatsToTempSheets`,
+				playerStatsToUpload,
+				{
+					headers: { Authorization: authHeader },
+				}
 			)
 			.then(function (response) {
 				// handle success
@@ -446,6 +426,23 @@ const StatsCongregate = (props: PassedProps) => {
 			.then(function () {
 				// always executed
 			})
+
+		// backendApi.instance
+		// 	.post<IndividualGamePlayerStats[]>(
+		// 		`PlayerStats/InsertWeeklyStats`,
+		// 		playerStatsToUpload
+		// 	)
+		// 	.then(function (response) {
+		// 		// handle success
+		// 		setIsUploading(false)
+		// 	})
+		// 	.catch(function (error) {
+		// 		// handle error
+		// 		console.log(error)
+		// 	})
+		// 	.then(function () {
+		// 		// always executed
+		// 	})
 	}
 
 	function exportToExcel() {
@@ -564,7 +561,10 @@ const StatsCongregate = (props: PassedProps) => {
 		// setSelectedGroupedDayGroup(group)
 		backendApi.instance
 			.get<BallChasingGroup[]>(
-				`BallChasingApi/GetGroupsByParentGroup/${group.id}`
+				`BallChasingApi/GetGroupsByParentGroup/${group.id}`,
+				{
+					headers: { Authorization: authHeader },
+				}
 			)
 			.then(function (response) {
 				// handle success
@@ -792,6 +792,7 @@ const StatsCongregate = (props: PassedProps) => {
 																		tempPlayerStatsByGame.push({
 																			Dummy1: "",
 																			Dummy2: "",
+																			Day: groupInt,
 																			Map: replay.map_name,
 																			Date: "",
 																			CarId: tempPlayerStats.car_id,
@@ -801,7 +802,7 @@ const StatsCongregate = (props: PassedProps) => {
 																			OnlineId: groupPlayerBeingProcessed.id,
 																			ReplayId: replay.id!!,
 																			ReplayTitle: replay.title ?? "",
-																			GameNumber: groupInt,
+																			GameNumber: 0, //TODO
 																			Tier: selectedLeagueGroup?.name ?? "",
 																			Team: groupPlayerBeingProcessed.team, //TODO THIS SHOULD COME FROM RSC SOMEWHERE
 																			OpponentTeam:

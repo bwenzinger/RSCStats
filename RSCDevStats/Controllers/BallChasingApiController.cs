@@ -38,6 +38,13 @@ namespace RSCWebApi.Controllers
         }
 
         [HttpGet]
+        [Route("AuthCheck")]
+        public bool AuthCheck()
+        {
+            return true;
+        }
+
+        [HttpGet]
         [Route("GetGroupsByCreator/{creator}")]
         public List<BallChasingGroup> GetGroupsByCreator(string creator)
         {

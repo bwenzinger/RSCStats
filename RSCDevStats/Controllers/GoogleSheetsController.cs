@@ -23,6 +23,9 @@ using System.Threading.Tasks;
 using static RSCWebApi.EntityFrameworkDatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using RSCDevStats.Helpers;
+using RSCDevStats.Constants;
+using Microsoft.AspNetCore.Authorization;
+using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource.AppendRequest;
 
 namespace RSCWebApi.Controllers
 {
@@ -244,11 +247,7 @@ namespace RSCWebApi.Controllers
 		public void RefreshDatabaseFromSheets()
 		{
             var driveRequest = _driveService.Files.List();
-            //driveRequest.DriveId = "1e4Qr_gFyOarff2iROs9YpSsg9PSSAMup";
-            //driveRequest.IncludeItemsFromAllDrives = true;
-            //driveRequest.Corpora = "DriveId";
             driveRequest.Q = "'1e4Qr_gFyOarff2iROs9YpSsg9PSSAMup' in parents";
-            //driveRequest.Fields = "files(id, name)";
             var driveResponse = driveRequest.Execute();
 
             List<IndividualGamePlayerStatsDB> individualGamesToAdd = new List<IndividualGamePlayerStatsDB>();
@@ -382,5 +381,49 @@ namespace RSCWebApi.Controllers
             }
             return;
 		}
-	}
+
+        [Authorize]
+        [HttpPost]
+        [Route("WritePlayerStatsToTempSheets")]
+        public void WritePlayerStatsToTempSheets(List<IndividualGamePlayerStatsForGoogleSheets> models)
+        {
+            foreach (KeyValuePair<string, string> entry in GlobalConstants.LeaguesAndBallchasingSheetIds)
+            {
+                var modelsToWrite = models.Where(x => x.Tier == entry.Key).ToList();
+
+                if(modelsToWrite.Count > 0)
+                {
+                    IList<IList<object>> toWriteToSheets = new List<IList<object>>();
+                    modelsToWrite.ForEach(model =>
+                    {
+                        toWriteToSheets.Add(model.ValuesToArray());
+                    });
+                    var appendRequest = _sheetsService.Spreadsheets.Values.Append(
+                        new Google.Apis.Sheets.v4.Data.ValueRange()
+                        {
+                            MajorDimension = "ROWS",
+                            Values = (IList<IList<object>>)toWriteToSheets
+                        },
+                        entry.Value,
+                        "Raw Stats");
+
+                    appendRequest.ValueInputOption = ValueInputOptionEnum.USERENTERED;
+                    var response = appendRequest.Execute();
+
+                    Console.WriteLine("test");
+                }
+            }
+            //using (var db = new EntityFrameworkDatabaseContext(_configuration))
+            //{
+            //    //var matchingPlayers = db.IndividualGamePlayerStatsDB.Where(x => models.Select(y => y.RSCId + y.ReplayId).Contains(x.RSCId + x.ReplayId));
+
+            //    //var entriesNotYetInDb = models.Where(x => !matchingPlayers.Any(y => y.ReplayId == x.ReplayId && y.RSCId == x.RSCId));
+
+            //    //db.IndividualGamePlayerStatsDB.AddRange(entriesNotYetInDb);
+            //    //db.SaveChanges();
+
+            //    return;
+            //}
+        }
+    }
 }
